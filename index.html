@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,49 +9,172 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
         /* ===== BASE & GLASSMORPHISM ===== */
-        body { background: #060b18; color: #cbd5e1; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass { background: rgba(255,255,255,0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
-        .glass-card { background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; transition: all 0.3s; }
-        .glass-card:hover { border-color: rgba(255,255,255,0.13); box-shadow: 0 8px 40px rgba(0,0,0,0.35); }
-        
+        body {
+            background: #060b18;
+            color: #cbd5e1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.13);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+        }
+
         /* ===== SIDEBAR & NAV ===== */
-        .sidebar { background: rgba(8,12,24,0.85); border-right: 1px solid rgba(255,255,255,0.05); }
-        .nav-item.active { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15)); color: #fff; border-left: 3px solid #3b82f6; }
-        .nav-item:hover:not(.active) { background: rgba(255,255,255,0.04); color: #fff; }
-        
+        .sidebar {
+            background: rgba(8, 12, 24, 0.85);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+            color: #fff;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .nav-item:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+        }
+
         /* ===== HIỆU ỨNG ACTIVE CHO ĐOẠN CHAT TRONG SIDEBAR ===== */
-        .chat-session-item.active { background: rgba(168, 85, 247, 0.15); color: #fff; border-left: 2px solid #a855f7; }
+        .chat-session-item.active {
+            background: rgba(168, 85, 247, 0.15);
+            color: #fff;
+            border-left: 2px solid #a855f7;
+        }
 
         /* ===== GLOW ACCENTS & BADGES ===== */
-        .glow-blue { border-top: 2px solid rgba(59,130,246,0.5); box-shadow: 0 0 25px rgba(59,130,246,0.12); }
-        .glow-red { border-top: 2px solid rgba(239,68,68,0.5); box-shadow: 0 0 25px rgba(239,68,68,0.15); }
-        .glow-emerald { border-top: 2px solid rgba(16,185,129,0.5); box-shadow: 0 0 25px rgba(16,185,129,0.12); }
-        .badge-critical { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid #ef4444; }
-        .badge-high { background: rgba(249,115,22,0.2); color: #f97316; border: 1px solid #f97316; }
-        .badge-medium { background: rgba(234,179,8,0.2); color: #eab308; border: 1px solid #eab308; }
-        .badge-low { background: rgba(34,197,94,0.2); color: #22c55e; border: 1px solid #22c55e; }
+        .glow-blue {
+            border-top: 2px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.12);
+        }
 
-        .btn-neon { background: linear-gradient(135deg, #3b82f6, #7c3aed); border-radius: 8px; color: white; transition: 0.3s; }
-        .btn-neon:hover { box-shadow: 0 0 15px rgba(99,102,241,0.5); transform: translateY(-1px); }
-        
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-        
+        .glow-red {
+            border-top: 2px solid rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.15);
+        }
+
+        .glow-emerald {
+            border-top: 2px solid rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+        }
+
+        .badge-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .badge-high {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+            border: 1px solid #f97316;
+        }
+
+        .badge-medium {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+            border: 1px solid #eab308;
+        }
+
+        .badge-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+
+        .btn-neon {
+            background: linear-gradient(135deg, #3b82f6, #7c3aed);
+            border-radius: 8px;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .btn-neon:hover {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px);
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
         /* ===== TYPING ANIMATION CHO AI CHAT ===== */
-        .typing-indicator { display: flex; align-items: center; gap: 4px; padding: 4px 2px; }
-        .typing-dot { width: 6px; height: 6px; background-color: #a855f7; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 2px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #a855f7;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+                opacity: 0.3;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Tắt outline mặc định khi focus vào nút lịch */
+        select:focus,
+        button:focus {
+            outline: none;
+        }
     </style>
 </head>
+
 <body class="h-screen flex overflow-hidden">
 
     <!-- CẬP NHẬT SIDEBAR: BỔ SUNG LỊCH SỬ CHAT -->
     <aside class="w-64 sidebar flex flex-col justify-between p-4 hidden md:flex z-10 relative h-screen">
         <div class="flex-1 flex flex-col overflow-hidden">
             <div class="flex items-center gap-3 mb-8 px-2 mt-2 shrink-0">
-                <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center border border-blue-400/20">
+                <div
+                    class="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center border border-blue-400/20">
                     <i class="fa-solid fa-shield-halved text-white text-xl"></i>
                 </div>
                 <div>
@@ -58,24 +182,33 @@
                     <p class="text-[10px] text-blue-400 font-bold uppercase tracking-[0.2em]">Dashboard</p>
                 </div>
             </div>
-            
+
             <nav class="space-y-1.5 shrink-0 mb-6">
-                <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all">
+                <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard"
+                    class="nav-item active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all">
                     <i class="fa-solid fa-chart-line w-5"></i> Bảng điều khiển
                 </a>
-                <a href="#" onclick="switchTab('nl2query')" id="nav-nl2query" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 transition-all">
+                <a href="#" onclick="switchTab('nl2query')" id="nav-nl2query"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 transition-all">
                     <i class="fa-solid fa-magnifying-glass w-5"></i> NL2Query
                 </a>
-                <a href="#" onclick="switchTab('chat')" id="nav-chat" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 transition-all">
+                <a href="#" onclick="switchTab('chat')" id="nav-chat"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 transition-all">
                     <i class="fa-solid fa-robot w-5"></i> Chat với AI
+                </a>
+                <a href="#" onclick="switchTab('vulns'); loadVulns();" id="nav-vulns"
+                    class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 transition-all">
+                    <i class="fa-solid fa-bug w-5"></i> Lỗ hổng (CVE)
                 </a>
             </nav>
 
-            <!-- DANH SÁCH CÁC ĐOẠN CHAT (CHỈ HIỂN THỊ KHI Ở TAB CHAT HOẶC LUÔN HIỂN THỊ TÙY Ý) -->
+            <!-- DANH SÁCH CÁC ĐOẠN CHAT -->
             <div class="flex-1 overflow-hidden flex flex-col border-t border-white/5 pt-4">
                 <div class="flex items-center justify-between px-3 mb-3 shrink-0">
                     <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lịch sử Chat</span>
-                    <button onclick="createNewChat()" class="text-slate-400 hover:text-white transition bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-md border border-white/5" title="Đoạn chat mới">
+                    <button onclick="createNewChat()"
+                        class="text-slate-400 hover:text-white transition bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-md border border-white/5"
+                        title="Đoạn chat mới">
                         <i class="fa-solid fa-plus text-xs"></i>
                     </button>
                 </div>
@@ -93,11 +226,129 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto" style="background-image: linear-gradient(rgba(59,130,246,0.025) 1px,transparent 1px), linear-gradient(90deg,rgba(59,130,246,0.025) 1px,transparent 1px); background-size: 48px 48px;">
-        <header class="flex items-center justify-between px-8 py-4 glass sticky top-0 z-20 shrink-0" style="border-top:none;border-left:none;border-right:none;">
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto"
+        style="background-image: linear-gradient(rgba(59,130,246,0.025) 1px,transparent 1px), linear-gradient(90deg,rgba(59,130,246,0.025) 1px,transparent 1px); background-size: 48px 48px;">
+        <!-- HEADER -->
+        <header
+            class="flex items-center justify-between px-8 py-4 glass sticky top-0 z-20 shrink-0 border-t-0 border-l-0 border-r-0">
             <h2 id="page-title" class="text-xl font-bold text-white tracking-wide">Bảng điều khiển</h2>
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full glass">
+
+            <div class="flex items-center gap-4 relative">
+                <!-- UI MỚI: NÚT KÍCH HOẠT LỊCH CHUẨN ELASTIC -->
+                <button type="button" id="siem-trigger"
+                    class="flex items-center gap-3 px-4 py-2 bg-[#0b1220] border border-slate-700/60 hover:border-slate-500/60 rounded-lg transition-all shadow-sm"
+                    onclick="toggleSiemPicker(event)">
+                    <i class="fa-regular fa-clock text-blue-400 text-lg"></i>
+                    <div class="flex flex-col items-start leading-tight">
+                        <span id="siem-preset-label" class="text-xs font-bold text-slate-200">7 ngày gần nhất</span>
+                        <span class="text-[10px] text-slate-500 font-mono mt-0.5" id="siem-range-label">— to now</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-2"></i>
+                </button>
+
+                <!-- UI MỚI: BẢNG LỌC POPOVER CHUẨN ELASTIC -->
+                <div id="siem-pop"
+                    class="absolute right-0 top-[110%] w-[680px] bg-[#0f172a] border border-slate-700 rounded-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] hidden z-50 flex-col overflow-hidden">
+                    <div class="flex border-b border-slate-700/50">
+
+                        <!-- PANE TRÁI: BỘ LỌC CÓ SẴN (PRESETS) -->
+                        <div class="w-1/3 bg-[#0b1220] p-4 flex flex-col gap-1 border-r border-slate-700/50">
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-2">Thường
+                                dùng</div>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="today" onclick="applyPreset('today')">Hôm nay</button>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="last24h" onclick="applyPreset('last24h')">24 giờ gần nhất</button>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="last7d" onclick="applyPreset('last7d')">7 ngày gần nhất</button>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="last30d" onclick="applyPreset('last30d')">30 ngày gần nhất</button>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="thisMonth" onclick="applyPreset('thisMonth')">Tháng này</button>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="all" onclick="applyPreset('all')">Toàn bộ thời gian</button>
+
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 px-2 mt-4">
+                                Gần đây</div>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="last15m" onclick="applyPreset('last15m')">15 phút trước</button>
+                            <button
+                                class="preset-btn text-left px-3 py-2 rounded-md text-xs text-slate-300 hover:bg-white/5 transition"
+                                data-preset="last1h" onclick="applyPreset('last1h')">1 giờ trước</button>
+                        </div>
+
+                        <!-- PANE PHẢI: LỊCH TÙY CHỈNH (ABSOLUTE) -->
+                        <div class="w-2/3 p-5 flex flex-col bg-[#0f172a]">
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Tùy chỉnh
+                                khoảng thời gian (Absolute)</div>
+
+                            <div class="flex gap-4 mb-5">
+                                <div
+                                    class="flex-1 bg-black/40 border border-slate-700 rounded-lg p-2.5 flex flex-col justify-center shadow-inner">
+                                    <span class="text-[10px] text-slate-500 uppercase font-semibold">Start date</span>
+                                    <span class="text-xs text-white font-mono mt-1" id="abs-start">—</span>
+                                </div>
+                                <div
+                                    class="flex-1 bg-black/40 border border-slate-700 rounded-lg p-2.5 flex flex-col justify-center shadow-inner">
+                                    <span class="text-[10px] text-slate-500 uppercase font-semibold">End date</span>
+                                    <span class="text-xs text-white font-mono mt-1" id="abs-end">now</span>
+                                </div>
+                            </div>
+
+                            <!-- Header Điều hướng Lịch -->
+                            <div
+                                class="flex items-center justify-between mb-4 bg-black/20 rounded-lg p-1.5 border border-white/5">
+                                <button type="button"
+                                    class="w-8 h-8 rounded text-slate-400 hover:bg-white/10 hover:text-white transition"
+                                    onclick="shiftCalMonth(-1)"><i
+                                        class="fa-solid fa-chevron-left text-xs"></i></button>
+                                <div class="flex gap-2">
+                                    <select id="cal-month"
+                                        class="bg-black/50 border border-slate-600 rounded-md px-3 py-1.5 text-xs text-white font-medium cursor-pointer"
+                                        onchange="onCalNav()"></select>
+                                    <select id="cal-year"
+                                        class="bg-black/50 border border-slate-600 rounded-md px-3 py-1.5 text-xs text-white font-medium cursor-pointer"
+                                        onchange="onCalNav()"></select>
+                                </div>
+                                <button type="button"
+                                    class="w-8 h-8 rounded text-slate-400 hover:bg-white/10 hover:text-white transition"
+                                    onclick="shiftCalMonth(1)"><i
+                                        class="fa-solid fa-chevron-right text-xs"></i></button>
+                            </div>
+
+                            <!-- Khung Lịch -->
+                            <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                                <span class="text-[10px] font-bold text-slate-500">T2</span>
+                                <span class="text-[10px] font-bold text-slate-500">T3</span>
+                                <span class="text-[10px] font-bold text-slate-500">T4</span>
+                                <span class="text-[10px] font-bold text-slate-500">T5</span>
+                                <span class="text-[10px] font-bold text-slate-500">T6</span>
+                                <span class="text-[10px] font-bold text-slate-500">T7</span>
+                                <span class="text-[10px] font-bold text-slate-500">CN</span>
+                            </div>
+                            <div id="cal-days" class="grid grid-cols-7 gap-1 flex-1 content-start"></div>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER GIAO DIỆN LỊCH -->
+                    <div class="bg-[#0b1220] p-3.5 flex justify-end gap-3 border-t border-slate-700/50">
+                        <button type="button"
+                            class="px-4 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition"
+                            onclick="toggleSiemPicker()">Hủy bỏ</button>
+                        <button type="button"
+                            class="btn-neon px-6 py-2 rounded-lg text-xs font-bold shadow-lg shadow-blue-500/20"
+                            onclick="applyAbsolute()">Áp dụng Filter</button>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full glass">
                     <div class="w-2 h-2 rounded-full bg-red-500 animate-ping"></div>
                     <span class="text-[11px] font-bold text-slate-300">Live Auto-Sync</span>
                 </div>
@@ -105,284 +356,773 @@
         </header>
 
         <div class="p-8 flex-1">
-            
+
             <!-- TAB: DASHBOARD -->
             <div id="tab-dashboard" class="tab-content space-y-6">
+                <!-- KPI CARDS -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     <div class="glass-card glow-blue p-5">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">Tổng Alert</span>
                         <div class="mt-2 text-3xl font-black text-white" id="kpi-total">0</div>
                     </div>
                     <div class="glass-card glow-red p-5">
-                        <span class="text-[10px] font-bold text-red-400 uppercase tracking-[0.1em]">Critical Alerts</span>
+                        <span class="text-[10px] font-bold text-red-400 uppercase tracking-[0.1em]">Critical
+                            Alerts</span>
                         <div class="mt-2 text-3xl font-black text-red-500" id="kpi-critical">0</div>
                     </div>
                     <div class="glass-card glow-emerald p-5">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">Agent Liên Quan</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">Agent Liên
+                            Quan</span>
                         <div class="mt-2 text-3xl font-black text-white" id="kpi-agents">0</div>
                     </div>
                     <div class="glass-card glow-blue p-5">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">Tỷ Lệ True Positive</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">Tỷ Lệ True
+                            Positive</span>
                         <div class="mt-2 text-3xl font-black text-emerald-400" id="kpi-tp">0%</div>
                     </div>
                 </div>
 
-                <h3 class="font-bold text-white text-lg mt-6 border-b border-white/10 pb-2">Phân tích Alerts (Live)</h3>
+                <!-- THANH TRẠNG THÁI XỬ LÝ -->
+                <div id="pipeline-bar" class="glass-card px-4 py-3 mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-300">
+                    <span class="text-slate-500 italic">Đang kiểm tra trạng thái xử lý...</span>
+                </div>
+
+                <!-- INFO RANGE CHOSEN -->
+                <div class="flex items-center justify-between border-b border-white/10 pb-2 mt-6">
+                    <h3 class="font-bold text-white text-lg">Phân tích Alerts (Live)</h3>
+                    <div
+                        class="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 font-mono text-xs text-slate-400 shadow-inner">
+                        <span class="font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded" id="query-hits">0
+                            hits</span>
+                        <span>from</span> <span class="text-white" id="query-from">—</span>
+                        <span>to</span> <span class="text-white" id="query-to">now</span>
+                    </div>
+                </div>
+
+                <!-- GRID DATA -->
                 <div id="alerts-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-4">
-                    <div class="text-slate-400">Đang tải dữ liệu từ SIEM...</div>
+                    <div class="text-slate-400 italic flex items-center gap-2"><i
+                            class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu từ SIEM...</div>
+                </div>
+
+                <!-- PHÂN TRANG -->
+                <div id="pagination-bar" class="flex items-center justify-between mt-5 text-sm hidden">
+                    <span class="text-slate-400" id="pagination-info">—</span>
+                    <div class="flex items-center gap-1">
+                        <button onclick="goToPage(currentPage - 1)" id="pg-prev"
+                            class="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <div id="pg-numbers" class="flex items-center gap-1"></div>
+                        <button onclick="goToPage(currentPage + 1)" id="pg-next"
+                            class="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- TAB: NL2QUERY -->
             <div id="tab-nl2query" class="tab-content hidden space-y-6">
+                <!-- Nội dung nguyên bản -->
                 <div class="glass-card p-6 flex flex-col max-w-4xl mx-auto">
-                    <h4 class="text-base font-bold mb-2 text-white"><i class="fa-solid fa-magnifying-glass text-blue-400 mr-2"></i> Sinh truy vấn OpenSearch</h4>
-                    <p class="text-xs text-slate-400 mb-4">Nhập ngôn ngữ tự nhiên để AI tự động chuyển thành Query DSL.</p>
-                    
-                    <textarea id="query-input" class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-blue-500 mb-4 h-24" placeholder="VD: Tìm các cảnh báo SQL injection trong 1 giờ qua..."></textarea>
-                    <button onclick="generateNL2Query()" id="btn-nl2q" class="btn-neon font-bold py-3 px-4 w-full text-sm">⚡ Sinh Query</button>
-                    
+                    <h4 class="text-base font-bold mb-2 text-white"><i
+                            class="fa-solid fa-magnifying-glass text-blue-400 mr-2"></i> Sinh truy vấn OpenSearch</h4>
+                    <p class="text-xs text-slate-400 mb-4">Nhập ngôn ngữ tự nhiên để AI tự động chuyển thành Query DSL.
+                    </p>
+
+                    <textarea id="query-input"
+                        class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-blue-500 mb-4 h-24"
+                        placeholder="VD: Tìm các cảnh báo SQL injection trong 1 giờ qua..."></textarea>
+                    <button onclick="generateNL2Query()" id="btn-nl2q"
+                        class="btn-neon font-bold py-3 px-4 w-full text-sm">⚡ Sinh Query</button>
+
                     <div class="mt-6 bg-black/50 rounded-xl border border-white/10 p-4 relative group">
                         <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">KẾT QUẢ DSL</span>
-                            <button onclick="copyQuery()" id="btn-copy" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-lg text-xs transition duration-200 opacity-0 group-hover:opacity-100 absolute top-3 right-3">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">KẾT QUẢ
+                                DSL</span>
+                            <button onclick="copyQuery()" id="btn-copy"
+                                class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-lg text-xs transition duration-200 opacity-0 group-hover:opacity-100 absolute top-3 right-3">
                                 <i class="fa-regular fa-copy"></i> Copy
                             </button>
                         </div>
-                        <pre id="query-output" class="text-emerald-400 font-mono text-sm overflow-y-auto max-h-64 whitespace-pre-wrap">...</pre>
+                        <pre id="query-output"
+                            class="text-emerald-400 font-mono text-sm overflow-y-auto max-h-64 whitespace-pre-wrap">...</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: VULNS (CVE) -->
+            <div id="tab-vulns" class="tab-content hidden space-y-6 h-full pb-8">
+                <!-- Nội dung nguyên bản -->
+                <div class="glass-card p-6 flex flex-col max-w-7xl mx-auto h-full max-h-full">
+                    <div class="flex flex-wrap items-center justify-between border-b border-white/10 pb-4 mb-4 gap-4">
+                        <h4 class="text-lg font-bold text-white"><i
+                                class="fa-solid fa-shield-virus text-red-400 mr-2"></i> Quản lý Lỗ hổng</h4>
+
+                        <div class="flex items-center gap-2">
+                            <select id="vuln-severity"
+                                class="bg-black/60 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500"
+                                onchange="vulnFilterChanged()">
+                                <option value="">— Tất cả mức độ —</option>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                            <button
+                                class="bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-lg text-xs transition"
+                                onclick="loadVulns()">
+                                <i class="fa-solid fa-rotate mr-1"></i> Tải lại
+                            </button>
+                            <button
+                                class="btn-neon bg-gradient-to-r from-red-500 to-orange-500 border-0 px-4 py-1.5 text-xs font-bold"
+                                onclick="explainTopVulns()">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Phân tích Top 5
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-xs text-slate-400" id="vuln-status">Đang đợi tải dữ liệu...</div>
+
+                    <div class="flex-1 overflow-x-auto rounded-xl border border-white/10 bg-black/20">
+                        <table class="w-full text-sm text-left text-slate-300">
+                            <thead class="text-xs uppercase bg-white/5 text-slate-400 border-b border-white/10">
+                                <tr>
+                                    <th class="px-4 py-3">CVE ID</th>
+                                    <th class="px-4 py-3">Mức độ</th>
+                                    <th class="px-4 py-3">CVSS</th>
+                                    <th class="px-4 py-3">Gói (Package)</th>
+                                    <th class="px-4 py-3">Agent</th>
+                                    <th class="px-4 py-3">Đánh giá của AI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vuln-rows" class="divide-y divide-white/5"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- PHÂN TRANG CVE -->
+                    <div id="vuln-pagination-bar" class="flex items-center justify-between mt-4 text-sm hidden shrink-0">
+                        <span class="text-slate-400" id="vuln-pagination-info">—</span>
+                        <div class="flex items-center gap-1">
+                            <button onclick="goToVulnPage(vulnCurrentPage - 1)" id="vuln-pg-prev"
+                                class="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <div id="vuln-pg-numbers" class="flex items-center gap-1"></div>
+                            <button onclick="goToVulnPage(vulnCurrentPage + 1)" id="vuln-pg-next"
+                                class="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- TAB: CHAT -->
             <div id="tab-chat" class="tab-content hidden space-y-6 h-full pb-8">
+                <!-- Nội dung nguyên bản -->
                 <div class="glass-card p-6 flex flex-col max-w-4xl mx-auto h-[650px] max-h-full">
                     <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4 shrink-0">
-                        <h4 class="text-base font-bold text-white"><i class="fa-solid fa-robot text-purple-400 mr-2"></i> Trợ lý SOC</h4>
-                        
+                        <h4 class="text-base font-bold text-white"><i
+                                class="fa-solid fa-robot text-purple-400 mr-2"></i> Trợ lý SOC</h4>
+
                         <div class="flex items-center gap-2">
-                            <button onclick="deleteCurrentChat()" class="text-xs text-slate-400 hover:text-red-400 transition bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 hover:border-red-500/30" title="Xóa đoạn chat này">
+                            <button onclick="deleteCurrentChat()"
+                                class="text-xs text-slate-400 hover:text-red-400 transition bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 hover:border-red-500/30"
+                                title="Xóa đoạn chat này">
                                 <i class="fa-solid fa-trash-can mr-1"></i> Xóa Chat
                             </button>
-                            
-                            <select id="chat-alert-select" class="bg-black/60 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-purple-500 w-64 max-w-full font-mono shadow-lg cursor-pointer transition">
-                                <option value="">— Không gắn Alert (Hỏi chung) —</option>
+
+                            <!-- BỘ LỌC MỚI -->
+                            <select id="chat-alert-severity"
+                                class="bg-black/60 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:border-purple-500 transition"
+                                onchange="filterChanged()">
+                                <option value="">Mọi mức độ</option>
+                                <option value="CRITICAL">Critical</option>
+                                <option value="HIGH">High</option>
+                            </select>
+                            <input type="text" id="chat-alert-search" placeholder="Tìm Rule/ID..."
+                                class="bg-black/60 border border-white/20 rounded-lg px-2 py-1.5 text-xs text-white focus:border-purple-500 w-32"
+                                oninput="debounceFetchDashboard()">
+
+                            <select id="chat-alert-select"
+                                class="bg-black/60 border border-white/20 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-purple-500 w-56 max-w-full font-mono shadow-lg cursor-pointer transition">
+                                <option value="">— Không gắn Alert —</option>
                             </select>
                         </div>
                     </div>
-                    
+
                     <div id="chat-history" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
                         <!-- Tin nhắn sẽ được JavaScript đẩy vào đây -->
                     </div>
 
                     <div class="flex gap-3 shrink-0">
-                        <input type="text" id="chat-input" placeholder="Hỏi AI về mã độc, phân tích log, hoặc cảnh báo..." class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 shadow-inner" onkeypress="if(event.key === 'Enter') sendChat()">
-                        <button onclick="sendChat()" id="btn-chat" class="btn-neon px-6 font-bold text-sm shadow-lg">Gửi</button>
+                        <input type="text" id="chat-input"
+                            placeholder="Hỏi AI về mã độc, phân tích log, hoặc cảnh báo..."
+                            class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 shadow-inner"
+                            onkeypress="if(event.key === 'Enter') sendChat()">
+                        <button onclick="sendChat()" id="btn-chat"
+                            class="btn-neon px-6 font-bold text-sm shadow-lg">Gửi</button>
                     </div>
                 </div>
             </div>
 
         </div>
     </main>
+    <!-- MODAL HIỂN THỊ REMEDIATION PLAN -->
+    <div id="alert-detail-modal"
+        class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity">
+        <div
+            class="glass-card w-[650px] max-w-[90%] max-h-[85vh] flex flex-col border border-blue-500/30 shadow-[0_0_50px_-10px_rgba(59,130,246,0.3)]">
+            <div class="flex justify-between items-center p-4 border-b border-white/10 shrink-0">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-magnifying-glass-chart text-blue-400 mr-2"></i>
+                    Chi tiết phân tích</h3>
+                <button onclick="closeAlertDetailModal()"
+                    class="text-slate-400 hover:text-white transition w-8 h-8 flex justify-center items-center rounded-full hover:bg-white/10">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 flex-1 overflow-y-auto" id="alert-detail-content">
+                <!-- Nội dung render bằng renderAlertDetail() -->
+            </div>
+            <div class="p-4 border-t border-white/10 flex justify-end gap-2 shrink-0" id="alert-detail-footer">
+                <button onclick="closeAlertDetailModal()"
+                    class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white transition">Đóng
+                    lại</button>
+            </div>
+        </div>
+    </div>
 
+    <div id="remediation-modal"
+        class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/70 backdrop-blur-sm transition-opacity">
+        <div
+            class="glass-card w-[600px] max-w-[90%] max-h-[85vh] flex flex-col border border-purple-500/30 shadow-[0_0_50px_-10px_rgba(168,85,247,0.3)]">
+            <div class="flex justify-between items-center p-4 border-b border-white/10 shrink-0">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-notes-medical text-purple-400 mr-2"></i>
+                    Kế hoạch khắc phục</h3>
+                <button onclick="closeRemediationModal()"
+                    class="text-slate-400 hover:text-white transition w-8 h-8 flex justify-center items-center rounded-full hover:bg-white/10">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 flex-1 overflow-y-auto">
+                <div id="remediation-cve-info" class="flex gap-2 mb-4 pb-4 border-b border-white/5">
+                    <!-- Thông tin CVE sẽ render ở đây -->
+                </div>
+                <div id="remediation-content" class="text-sm text-slate-300 leading-relaxed space-y-3">
+                    <!-- Nội dung AI sẽ render ở đây -->
+                </div>
+            </div>
+            <div class="p-4 border-t border-white/10 flex justify-end shrink-0">
+                <button onclick="closeRemediationModal()"
+                    class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white transition">Đóng
+                    lại</button>
+            </div>
+        </div>
+    </div>
     <script>
         // ==========================================
-        // HỆ THỐNG QUẢN LÝ ĐA PHIÊN CHAT (SESSIONS)
+        // CÁC HÀM CƠ BẢN VÀ MENU
         // ==========================================
-        let chatSessions = [];
-        let currentSessionId = null;
-
-        function initChatSystem() {
-            // Lấy dữ liệu đa phiên từ trình duyệt
-            const savedSessions = localStorage.getItem('soc_chat_sessions');
-            
-            if (savedSessions) {
-                chatSessions = JSON.parse(savedSessions);
-            } else {
-                // Hỗ trợ chuyển đổi dữ liệu từ phiên bản cũ (nếu bạn còn lưu)
-                const legacyData = JSON.parse(localStorage.getItem('soc_chat_history'));
-                if (legacyData && legacyData.length > 0) {
-                    chatSessions = [{ id: Date.now().toString(), title: 'Lịch sử cũ', messages: legacyData }];
-                    localStorage.removeItem('soc_chat_history');
-                } else {
-                    chatSessions = [];
-                }
-            }
-
-            if (chatSessions.length === 0) {
-                createNewChat(false); // Tạo 1 chat mặc định nếu trống
-            } else {
-                currentSessionId = chatSessions[0].id;
-                renderSidebarChats();
-                renderChatHistory();
-            }
-        }
-
-        function createNewChat(switchTabFlag = true) {
-            const newId = Date.now().toString();
-            chatSessions.unshift({
-                id: newId,
-                title: 'Đoạn chat mới',
-                messages: []
-            });
-            currentSessionId = newId;
-            saveChats();
-            renderSidebarChats();
-            renderChatHistory();
-            if (switchTabFlag) switchTab('chat');
-        }
-
-        function selectChat(id) {
-            currentSessionId = id;
-            renderSidebarChats();
-            renderChatHistory();
-            switchTab('chat');
-        }
-
-        function saveChats() {
-            localStorage.setItem('soc_chat_sessions', JSON.stringify(chatSessions));
-        }
-
-        function renderSidebarChats() {
-            const listDiv = document.getElementById('sidebar-chat-list');
-            if (!listDiv) return;
-            listDiv.innerHTML = '';
-            
-            chatSessions.forEach(session => {
-                const isActive = session.id === currentSessionId;
-                const activeClass = isActive ? 'chat-session-item active' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200';
-                
-                listDiv.insertAdjacentHTML('beforeend', `
-                    <div onclick="selectChat('${session.id}')" class="cursor-pointer text-xs px-3 py-2.5 rounded-lg truncate transition-all mb-1 flex items-center ${activeClass}">
-                        <i class="fa-regular fa-message mr-2.5 opacity-70"></i> 
-                        <span class="truncate">${escapeHTML(session.title)}</span>
-                    </div>
-                `);
-            });
-        }
-
-        function renderChatHistory() {
-            const historyDiv = document.getElementById('chat-history');
-            historyDiv.innerHTML = '';
-            
-            const currentSession = chatSessions.find(s => s.id === currentSessionId);
-            if (!currentSession || currentSession.messages.length === 0) {
-                historyDiv.innerHTML = '<div class="text-slate-400 text-sm italic text-center mt-10 mb-4 opacity-50"><i class="fa-solid fa-bolt text-2xl mb-3 block text-purple-400/50"></i> AI đã sẵn sàng hỗ trợ bạn phân tích sự cố.</div>';
-                return;
-            }
-
-            currentSession.messages.forEach(msg => {
-                if (msg.role === 'user') {
-                    historyDiv.insertAdjacentHTML('beforeend', `
-                        <div class="flex justify-end">
-                            <div class="bg-blue-600/30 border border-blue-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tr-sm max-w-[80%]">${escapeHTML(msg.content)}</div>
-                        </div>`);
-                } else if (msg.role === 'assistant') {
-                    historyDiv.insertAdjacentHTML('beforeend', `
-                        <div class="flex justify-start">
-                            <div class="bg-purple-600/20 border border-purple-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tl-sm max-w-[80%] whitespace-pre-wrap">${msg.content}</div>
-                        </div>`);
-                }
-            });
-            historyDiv.scrollTop = historyDiv.scrollHeight;
-        }
-
-        function deleteCurrentChat() {
-            if (confirm("Bạn có chắc chắn muốn xóa đoạn chat này không?")) {
-                chatSessions = chatSessions.filter(s => s.id !== currentSessionId);
-                if (chatSessions.length === 0) {
-                    createNewChat(false);
-                } else {
-                    currentSessionId = chatSessions[0].id;
-                }
-                saveChats();
-                renderSidebarChats();
-                renderChatHistory();
-            }
-        }
-
-        // Khởi động hệ thống chat
-        initChatSystem();
-
-        // ==========================================
-        // CÁC HÀM CƠ BẢN CÒN LẠI
-        // ==========================================
-
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.getElementById('nav-' + tabId).classList.add('active');
-            
-            const titles = { 'dashboard':'Bảng điều khiển SOC', 'nl2query':'Sinh truy vấn (NL2Query)', 'chat':'Trợ lý AI' };
+
+            const titles = { 'dashboard': 'Bảng điều khiển SOC', 'nl2query': 'Sinh truy vấn (NL2Query)', 'chat': 'Trợ lý AI', 'vulns': 'Quản lý Lỗ hổng (CVE)' };
             document.getElementById('page-title').innerText = titles[tabId];
-            
-            if(tabId === 'chat') {
+
+            if (tabId === 'chat') {
                 renderSidebarChats();
                 const hDiv = document.getElementById('chat-history');
                 hDiv.scrollTop = hDiv.scrollHeight;
             }
         }
 
-        async function fetchDashboard() {
-            try {
-                const statRes = await fetch('/api/v1/soc/stats');
-                const stats = await statRes.json();
-                document.getElementById('kpi-total').innerText = stats.total_alerts;
-                document.getElementById('kpi-critical').innerText = stats.critical_alerts;
-                document.getElementById('kpi-agents').innerText = stats.agents_count;
-                document.getElementById('kpi-tp').innerText = stats.tp_rate + '%';
+        function escapeHTML(str) {
+            return String(str ?? '').replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        }
 
-                const alertRes = await fetch('/api/v1/soc/alerts');
-                const alertData = await alertRes.json();
-                
-                let html = '';
-                alertData.alerts.forEach(a => {
-                    const sev = a.severity || 'LOW';
-                    const badgeClass = 'badge-' + sev.toLowerCase();
-                    let verdictHtml = '';
-                    if (a.verdict === 'true_positive') {
-                        verdictHtml = `<span class="text-emerald-400 font-bold text-xs"><i class="fa fa-check mr-1"></i> Đã đánh giá: True Positive</span>`;
-                    } else if (a.verdict === 'false_positive') {
-                        verdictHtml = `<span class="text-yellow-400 font-bold text-xs"><i class="fa fa-times mr-1"></i> Đã đánh giá: False Positive</span>`;
-                    } else {
-                        verdictHtml = `
-                            <button onclick="setVerdict(${a.id}, 'true_positive')" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-md text-[11px] font-bold hover:bg-emerald-500/40 transition">✓ True Positive</button>
-                            <button onclick="setVerdict(${a.id}, 'false_positive')" class="px-3 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-md text-[11px] font-bold hover:bg-yellow-500/40 transition">✕ False Positive</button>
-                        `;
+        // ==========================================
+        // HỆ THỐNG FILTER LỊCH (DATE PICKER) CHUẨN ELASTIC
+        // ==========================================
+        let lastAlertPayload = { alerts: [] };
+        let timeRange = { preset: 'last7d', from: null, to: null };
+        let draftFrom = null, draftTo = null, pickStep = 0;
+        let calCursor = new Date();
+        const PRESET_LABELS = {
+            last15m: '15 phút gần nhất', last1h: '1 giờ gần nhất', last24h: '24 giờ gần nhất',
+            last7d: '7 ngày gần nhất', last30d: '30 ngày gần nhất', today: 'Hôm nay',
+            thisWeek: 'Tuần này', thisMonth: 'Tháng này', all: 'Toàn bộ thời gian', absolute: 'Khoảng tùy chỉnh'
+        };
+
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function fmtDT(d) {
+            if (!d) return '—';
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+        function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+        function endOfDay(d) { const x = new Date(d); x.setHours(23, 59, 59, 999); return x; }
+        function parseAlertTime(ts) {
+            const t = Date.parse(ts);
+            return Number.isNaN(t) ? null : new Date(t);
+        }
+
+        function computePreset(id) {
+            const now = new Date();
+            if (id === 'all') return { from: null, to: null };
+            if (id === 'last15m') return { from: new Date(now - 15 * 60 * 1000), to: now };
+            if (id === 'last1h') return { from: new Date(now - 60 * 60 * 1000), to: now };
+            if (id === 'last24h') return { from: new Date(now - 24 * 60 * 60 * 1000), to: now };
+            if (id === 'last7d') return { from: new Date(now - 7 * 24 * 60 * 60 * 1000), to: now };
+            if (id === 'last30d') return { from: new Date(now - 30 * 24 * 60 * 60 * 1000), to: now };
+            if (id === 'today') return { from: startOfDay(now), to: now };
+            if (id === 'thisWeek') {
+                const s = startOfDay(now);
+                const day = (s.getDay() + 6) % 7;
+                s.setDate(s.getDate() - day);
+                return { from: s, to: now };
+            }
+            if (id === 'thisMonth') return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: now };
+            return { from: timeRange.from, to: timeRange.to };
+        }
+
+        function alertInRange(a) {
+            if (!timeRange.from) return true;
+            const t = parseAlertTime(a.timestamp);
+            if (!t) return true;
+            const to = timeRange.to || new Date();
+            return t >= timeRange.from && t <= to;
+        }
+
+        function syncSiemLabels() {
+            const r = timeRange.preset === 'all' ? { from: null, to: null } : timeRange;
+            const fromStr = r.from ? fmtDT(r.from) : '—';
+            const toStr = r.to ? fmtDT(r.to) : (r.from ? 'now' : 'now');
+
+            document.getElementById('siem-range-label').textContent = `${fromStr} → ${toStr}`;
+            document.getElementById('siem-preset-label').textContent = PRESET_LABELS[timeRange.preset] || 'Khoảng tùy chỉnh';
+            document.getElementById('query-from').textContent = fromStr;
+            document.getElementById('query-to').textContent = toStr;
+
+            // Xử lý Active state cho Presets Button
+            document.querySelectorAll('.preset-btn').forEach(b => {
+                if (b.dataset.preset === timeRange.preset) {
+                    b.classList.add('bg-blue-500/20', 'text-blue-400', 'font-semibold', 'border-l-2', 'border-blue-500');
+                    b.classList.remove('text-slate-300');
+                } else {
+                    b.classList.remove('bg-blue-500/20', 'text-blue-400', 'font-semibold', 'border-l-2', 'border-blue-500');
+                    b.classList.add('text-slate-300');
+                }
+            });
+
+            document.getElementById('abs-start').textContent = (draftFrom || r.from) ? fmtDT(draftFrom || r.from) : '—';
+            document.getElementById('abs-end').textContent = (draftTo || r.to) ? fmtDT(draftTo || r.to) : 'now';
+        }
+
+        function toggleSiemPicker(ev) {
+            if (ev) ev.stopPropagation();
+            const pop = document.getElementById('siem-pop');
+            const open = !pop.classList.contains('hidden');
+            pop.classList.toggle('hidden', open);
+            pop.classList.toggle('flex', !open);
+
+            if (!open) {
+                draftFrom = timeRange.from; draftTo = timeRange.to; pickStep = 0;
+                calCursor = new Date(timeRange.to || timeRange.from || Date.now());
+                fillCalNav(); renderCalendar(); syncSiemLabels();
+            }
+        }
+
+        function applyPreset(id) {
+            const r = computePreset(id);
+            timeRange = { preset: id, from: r.from, to: r.to };
+            document.getElementById('siem-pop').classList.add('hidden');
+            document.getElementById('siem-pop').classList.remove('flex');
+            syncSiemLabels();
+            // TRƯỚC: chỉ renderFilteredDashboard() — lọc lại trên dữ liệu đã
+            // fetch sẵn (tối đa 50 dòng), nên đổi khoảng thời gian không kéo
+            // thêm dữ liệu mới từ DB. Giờ khoảng thời gian được lọc ở backend
+            // nên phải fetch lại. Đổi filter luôn quay về trang 1.
+            currentPage = 1;
+            fetchDashboard();
+        }
+
+        function applyAbsolute() {
+            if (!draftFrom) { applyPreset('all'); return; }
+            const from = draftFrom;
+            const to = draftTo || endOfDay(draftFrom);
+            timeRange = { preset: 'absolute', from: from <= to ? from : to, to: from <= to ? to : from };
+            document.getElementById('siem-pop').classList.add('hidden');
+            document.getElementById('siem-pop').classList.remove('flex');
+            syncSiemLabels();
+            currentPage = 1;
+            fetchDashboard();
+        }
+
+        function fillCalNav() {
+            const mSel = document.getElementById('cal-month');
+            const ySel = document.getElementById('cal-year');
+            const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+            mSel.innerHTML = months.map((n, i) => `<option value="${i}" ${i === calCursor.getMonth() ? 'selected' : ''}>${n}</option>`).join('');
+            const y = new Date().getFullYear();
+            ySel.innerHTML = '';
+            for (let i = y - 3; i <= y; i++) ySel.insertAdjacentHTML('beforeend', `<option value="${i}" ${i === calCursor.getFullYear() ? 'selected' : ''}>${i}</option>`);
+        }
+
+        function onCalNav() {
+            calCursor = new Date(Number(document.getElementById('cal-year').value), Number(document.getElementById('cal-month').value), 1);
+            renderCalendar();
+        }
+
+        function shiftCalMonth(delta) {
+            calCursor.setMonth(calCursor.getMonth() + delta);
+            fillCalNav(); renderCalendar();
+        }
+
+        function dayKey(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+
+        function renderCalendar() {
+            const host = document.getElementById('cal-days');
+            host.innerHTML = '';
+            const y = calCursor.getFullYear(), m = calCursor.getMonth();
+            const first = new Date(y, m, 1);
+            const startIdx = (first.getDay() + 6) % 7;
+            const daysIn = new Date(y, m + 1, 0).getDate();
+            const now = new Date();
+
+            const alertDays = new Set();
+            const critDays = new Set();
+            (lastAlertPayload.alerts || []).forEach(a => {
+                const t = parseAlertTime(a.timestamp);
+                if (!t) return;
+                const k = dayKey(t);
+                alertDays.add(k);
+                if (String(a.severity).toUpperCase() === 'CRITICAL') critDays.add(k);
+            });
+            const from = draftFrom, to = draftTo || draftFrom;
+
+            for (let i = 0; i < startIdx; i++) host.insertAdjacentHTML('beforeend', '<div></div>');
+
+            for (let d = 1; d <= daysIn; d++) {
+                const date = new Date(y, m, d);
+                const k = dayKey(date);
+                const disabled = date > now;
+
+                let baseCls = "relative h-[34px] rounded-md text-xs flex flex-col items-center justify-center transition-colors ";
+                let textCls = disabled ? "text-slate-600 cursor-not-allowed" : "text-slate-300 hover:bg-white/10 cursor-pointer";
+                let bgCls = "";
+
+                if (from && !disabled) {
+                    const a = startOfDay(from).getTime();
+                    const b = startOfDay(to).getTime();
+                    const cur = startOfDay(date).getTime();
+                    if (cur === a || cur === b) {
+                        bgCls = "bg-blue-600 text-white font-bold shadow-md hover:bg-blue-500";
+                        textCls = "text-white";
+                    } else if (cur > Math.min(a, b) && cur < Math.max(a, b)) {
+                        bgCls = "bg-blue-500/20";
                     }
+                }
 
-                    html += `
+                let dotHtml = "";
+                if (critDays.has(k)) dotHtml = '<div class="absolute bottom-1 w-[4px] h-[4px] rounded-full bg-red-500"></div>';
+                else if (alertDays.has(k)) dotHtml = '<div class="absolute bottom-1 w-[4px] h-[4px] rounded-full bg-blue-400"></div>';
+
+                host.insertAdjacentHTML('beforeend', `<button type="button" class="${baseCls} ${textCls} ${bgCls}" ${disabled ? 'disabled' : ''} onclick="pickDay(${y},${m},${d})"><span>${d}</span>${dotHtml}</button>`);
+            }
+        }
+
+        function pickDay(y, m, d) {
+            const day = startOfDay(new Date(y, m, d));
+            if (pickStep === 0 || (draftFrom && draftTo)) {
+                draftFrom = day; draftTo = null; pickStep = 1;
+            } else {
+                draftTo = endOfDay(day); pickStep = 0;
+            }
+            syncSiemLabels(); renderCalendar();
+        }
+
+        // Tắt popover khi click ra ngoài
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('siem-pop');
+            const trg = document.getElementById('siem-trigger');
+            if (!pop || pop.classList.contains('hidden')) return;
+            if (pop.contains(e.target) || trg.contains(e.target)) return;
+            pop.classList.add('hidden');
+            pop.classList.remove('flex');
+        });
+
+        // ==========================================
+        // RENDER DỮ LIỆU DASHBOARD TỪ LỌC
+        // ==========================================
+        function renderFilteredDashboard() {
+            // TRƯỚC: alerts chỉ là mảng client-side lọc lại từ tối đa 50 dòng
+            // đã fetch (.filter(alertInRange)). Giờ backend đã lọc theo
+            // severity/search/thời gian VÀ phân trang sẵn, nên dùng thẳng
+            // lastAlertPayload.alerts (đúng 20 dòng của trang hiện tại).
+            const alerts = lastAlertPayload.alerts || [];
+            // KPI tổng (tổng/critical/agents/tp_rate) lấy từ "stats" — được
+            // backend tính trên TOÀN BỘ tập dữ liệu khớp filter, không phải
+            // chỉ trên 20 dòng của trang hiện tại.
+            const stats = lastAlertPayload.stats || { total_alerts: alerts.length, critical_alerts: 0, agents_count: 0, tp_rate: 0 };
+
+            document.getElementById('kpi-total').innerText = stats.total_alerts;
+            document.getElementById('kpi-critical').innerText = stats.critical_alerts;
+            document.getElementById('kpi-agents').innerText = stats.agents_count;
+            document.getElementById('kpi-tp').innerText = stats.tp_rate + '%';
+            document.getElementById('query-hits').textContent = stats.total_alerts + ' hits';
+
+            syncSiemLabels();
+            renderPagination(stats.total_alerts);
+
+            let html = '';
+            currentAlertsById = {};   // dùng cho nút "Xem đầy đủ" mở modal chi tiết
+            alerts.forEach(a => {
+                currentAlertsById[Number(a.id)] = a;
+                const sev = String(a.severity || 'LOW');
+                const badgeClass = 'badge-' + sev.toLowerCase().replace(/[^a-z]/g, '');
+                let verdictHtml = '';
+                if (a.verdict === 'true_positive') {
+                    verdictHtml = `<span class="text-emerald-400 font-bold text-xs"><i class="fa fa-check mr-1"></i> Đã đánh giá: True Positive</span>`;
+                } else if (a.verdict === 'false_positive') {
+                    verdictHtml = `<span class="text-yellow-400 font-bold text-xs"><i class="fa fa-times mr-1"></i> Đã đánh giá: False Positive</span>`;
+                } else {
+                    verdictHtml = `
+                            <button onclick="setVerdict(${Number(a.id)}, 'true_positive')" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-md text-[11px] font-bold hover:bg-emerald-500/40 transition">✓ True Positive</button>
+                            <button onclick="setVerdict(${Number(a.id)}, 'false_positive')" class="px-3 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-md text-[11px] font-bold hover:bg-yellow-500/40 transition">✕ False Positive</button>
+                        `;
+                }
+
+                // Sự cố gộp: nhiều cảnh báo cùng nguồn được gom thành 1 thẻ
+                const n = Number(a.alert_count) || 1;
+                let incidentHtml = '';
+                if (n > 1) {
+                    const t0 = String(a.incident_start || '').replace('T', ' ').slice(11, 19);
+                    const t1 = String(a.incident_end || '').replace('T', ' ').slice(11, 19);
+                    incidentHtml = `
+                            <div class="flex flex-wrap items-center gap-2 mb-3 text-[11px]">
+                                <span class="px-2 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold"><i class="fa fa-layer-group mr-1"></i>Sự cố gộp ${n} cảnh báo</span>
+                                ${a.source_ip ? `<span class="text-slate-400">Nguồn: <span class="text-red-400 font-mono font-bold">${escapeHTML(a.source_ip)}</span></span>` : ''}
+                                ${t0 ? `<span class="text-slate-500 font-mono">${escapeHTML(t0)} → ${escapeHTML(t1)}</span>` : ''}
+                            </div>`;
+                }
+
+                html += `
                     <div class="glass-card p-5 flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-start mb-2">
-                                <span class="${badgeClass} px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">${sev}</span>
-                                <span class="text-xs text-slate-500 font-mono">${a.timestamp}</span>
+                                <span class="${badgeClass} px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">${escapeHTML(sev)}</span>
+                                <span class="text-xs text-slate-500 font-mono">${escapeHTML(a.timestamp)}</span>
                             </div>
-                            <h4 class="font-bold text-white text-sm mb-1">${a.rule_description}</h4>
-                            <p class="text-xs text-slate-400 mb-3">Agent: <span class="text-blue-400 font-bold">${a.agent_name}</span> · Rule: ${a.rule_id}</p>
-                            
+                            <h4 class="font-bold text-white text-sm mb-1">${escapeHTML(a.rule_description)}</h4>
+                            <p class="text-xs text-slate-400 mb-3">Agent: <span class="text-blue-400 font-bold">${escapeHTML(a.agent_name)}</span> · Rule: ${escapeHTML(a.rule_id)}</p>
+                            ${incidentHtml}
                             <div class="bg-black/30 p-3 rounded-lg border border-white/5 mb-4">
-                                <div class="text-xs text-slate-300 line-clamp-3" title="${a.analysis}"><strong>AI Phân tích:</strong> ${a.analysis}</div>
+                                <div class="text-xs text-slate-300 line-clamp-3"><strong>AI Phân tích:</strong> ${escapeHTML(a.analysis)}</div>
+                                <button onclick="openAlertDetailModal(${Number(a.id)})" class="mt-2 text-[11px] font-bold text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-up-right-and-down-left-from-center mr-1"></i>Xem đầy đủ</button>
                             </div>
                         </div>
                         <div class="flex gap-2 items-center border-t border-white/5 pt-3 mt-auto">
                             ${verdictHtml}
                         </div>
                     </div>`;
-                });
-                document.getElementById('alerts-grid').innerHTML = html || '<div class="text-slate-400">Chưa có alert nào.</div>';
+            });
+            document.getElementById('alerts-grid').innerHTML = html || '<div class="text-slate-400 italic">Không có cảnh báo nào trong khoảng thời gian đã chọn.</div>';
 
-                const alertSelect = document.getElementById('chat-alert-select');
-                const currentSelectedId = alertSelect.value;
-                let selectHtml = '<option value="">— Không gắn Alert (Hỏi chung) —</option>';
-                alertData.alerts.slice(0, 30).forEach(a => {
-                    selectHtml += `<option value="${a.id}">#${a.id} [${a.severity}] ${a.rule_description}</option>`;
-                });
-                alertSelect.innerHTML = selectHtml;
-                alertSelect.value = currentSelectedId;
-                
+            const alertSelect = document.getElementById('chat-alert-select');
+            const currentSelectedId = alertSelect.value;
+            let selectHtml = '<option value="">— Không gắn Alert (Hỏi chung) —</option>';
+            alerts.slice(0, 30).forEach(a => {
+                selectHtml += `<option value="${Number(a.id)}">#${Number(a.id)} [${escapeHTML(a.severity)}] ${escapeHTML(a.rule_description)}</option>`;
+            });
+            alertSelect.innerHTML = selectHtml;
+            alertSelect.value = currentSelectedId;
+        }
+
+        // --- PHÂN TRANG: 20 alert/trang ---
+        const PAGE_SIZE = 20;
+        let currentPage = 1;
+
+        let dashDebounce;
+        function debounceFetchDashboard() {
+            currentPage = 1; // gõ tìm kiếm mới thì quay về trang 1
+            clearTimeout(dashDebounce);
+            dashDebounce = setTimeout(fetchDashboard, 400);
+        }
+
+        function filterChanged() {
+            currentPage = 1; // đổi severity thì quay về trang 1
+            fetchDashboard();
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.max(1, Math.ceil((lastAlertPayload.total || 0) / PAGE_SIZE));
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            fetchDashboard();
+            document.getElementById('alerts-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderPagination(total) {
+            const bar = document.getElementById('pagination-bar');
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+            if (total <= PAGE_SIZE) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
+
+            const startItem = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+            const endItem = Math.min(currentPage * PAGE_SIZE, total);
+            document.getElementById('pagination-info').textContent =
+                `Hiển thị ${startItem}–${endItem} / ${total} alert · Trang ${currentPage}/${totalPages}`;
+
+            document.getElementById('pg-prev').disabled = currentPage <= 1;
+            document.getElementById('pg-next').disabled = currentPage >= totalPages;
+
+            // Danh sách số trang rút gọn: trang đầu, trang cuối, trang hiện
+            // tại và 1 trang liền kề mỗi bên, còn lại thay bằng "…"
+            const pages = [];
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) pages.push(p);
+                else if (pages[pages.length - 1] !== '…') pages.push('…');
+            }
+
+            document.getElementById('pg-numbers').innerHTML = pages.map(p => {
+                if (p === '…') return `<span class="px-2 text-slate-600">…</span>`;
+                const active = p === currentPage;
+                return `<button onclick="goToPage(${p})"
+                    class="min-w-[32px] px-2 py-1.5 rounded-md border text-xs font-bold transition ${active
+                        ? 'bg-blue-500/20 border-blue-500 text-blue-400'
+                        : 'border-white/10 bg-white/5 hover:bg-white/10 text-slate-300'}">${p}</button>`;
+            }).join('');
+        }
+
+        // Định dạng lại theo đúng kiểu datetime.now().isoformat(timespec="seconds")
+        // mà gateway.py dùng khi lưu timestamp (giờ local, KHÔNG có hậu tố Z/UTC).
+        // Nếu dùng d.toISOString() sẽ bị lệch múi giờ so với dữ liệu trong DB.
+        function toLocalISO(d) {
+            const p = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+        }
+
+        async function fetchDashboard() {
+            try {
+                const sevNode = document.getElementById('chat-alert-severity');
+                const searchNode = document.getElementById('chat-alert-search');
+
+                // TRƯỚC: luôn "limit=50" và KHÔNG truyền khoảng thời gian lên
+                // backend — nên dashboard chỉ bao giờ thấy đúng 50 alert mới
+                // nhất trong DB, dù chọn "Hôm nay" hay "Toàn bộ thời gian" thì
+                // vẫn lọc trên đúng 50 dòng đó ở phía client. Giờ phân trang
+                // thật sự: mỗi lần fetch chỉ lấy đúng PAGE_SIZE (20) dòng của
+                // trang currentPage.
+                const offset = (currentPage - 1) * PAGE_SIZE;
+                let url = `/api/v1/soc/alerts?limit=${PAGE_SIZE}&offset=${offset}&hide_sca=true`;
+                if (sevNode && sevNode.value) url += `&severity=${sevNode.value}`;
+                if (searchNode && searchNode.value) url += `&search=${encodeURIComponent(searchNode.value)}`;
+                if (timeRange.from) url += `&from_ts=${encodeURIComponent(toLocalISO(timeRange.from))}`;
+                if (timeRange.to) url += `&to_ts=${encodeURIComponent(toLocalISO(timeRange.to))}`;
+
+                const alertRes = await fetch(url);
+                lastAlertPayload = await alertRes.json();
+                if (!lastAlertPayload.alerts) lastAlertPayload.alerts = [];
+                renderFilteredDashboard();
             } catch (err) { console.error("Lỗi lấy dữ liệu", err); }
+        }
+
+        // --- MODAL "XEM ĐẦY ĐỦ" PHÂN TÍCH AI ---
+        let currentAlertsById = {};
+
+        function renderActionsList(raw) {
+            let actions = [];
+            try {
+                actions = JSON.parse(raw || '[]');
+            } catch (e) { /* recommended_actions không phải JSON hợp lệ, bỏ qua */ }
+            if (!Array.isArray(actions) || actions.length === 0) return '<p class="text-slate-500 italic">Không có hành động đề xuất.</p>';
+            return '<ul class="list-disc list-inside space-y-1">' + actions.map(x => `<li>${escapeHTML(String(x))}</li>`).join('') + '</ul>';
+        }
+
+        function renderSourcesList(raw) {
+            let sources = [];
+            try {
+                sources = JSON.parse(raw || '[]');
+            } catch (e) { /* sources_used không phải JSON hợp lệ, bỏ qua */ }
+            if (!Array.isArray(sources) || sources.length === 0) return '';
+            const items = sources.map(x => `<span class="inline-block bg-white/5 border border-white/10 rounded px-2 py-1 text-[11px] text-slate-400 mr-1 mb-1"><i class="fa-solid fa-book mr-1 text-slate-500"></i>${escapeHTML(x.file || '')} — ${escapeHTML(x.heading || '')}</span>`).join('');
+            return `<div class="mt-4 pt-4 border-t border-white/5"><p class="text-xs font-bold text-slate-400 mb-2">Nguồn Playbook đã tham khảo:</p>${items}</div>`;
+        }
+
+        function openAlertDetailModal(alertId) {
+            const a = currentAlertsById[alertId];
+            const box = document.getElementById('alert-detail-content');
+            if (!a) {
+                box.innerHTML = '<p class="text-red-400">Không tìm thấy dữ liệu cảnh báo (có thể danh sách đã được tải lại).</p>';
+                document.getElementById('alert-detail-modal').classList.remove('hidden');
+                return;
+            }
+            const sev = String(a.severity || 'LOW');
+            const badgeClass = 'badge-' + sev.toLowerCase().replace(/[^a-z]/g, '');
+            const n = Number(a.alert_count) || 1;
+
+            let incidentBlock = '';
+            if (n > 1) {
+                const t0 = String(a.incident_start || '').replace('T', ' ').slice(11, 19);
+                const t1 = String(a.incident_end || '').replace('T', ' ').slice(11, 19);
+                incidentBlock = `<div class="mb-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 text-xs text-purple-300">
+                        <i class="fa fa-layer-group mr-1"></i><b>Sự cố gộp ${n} cảnh báo</b>
+                        ${a.source_ip ? ` · Nguồn: <span class="font-mono font-bold text-red-400">${escapeHTML(a.source_ip)}</span>` : ''}
+                        ${t0 ? ` · ${escapeHTML(t0)} → ${escapeHTML(t1)}` : ''}
+                    </div>`;
+            }
+
+            box.innerHTML = `
+                <div class="flex flex-wrap gap-2 items-center mb-3">
+                    <span class="${badgeClass} px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">${escapeHTML(sev)}</span>
+                    <span class="text-xs text-slate-500 font-mono">${escapeHTML(a.timestamp)}</span>
+                    ${a.confidence !== undefined && a.confidence !== '' ? `<span class="text-xs text-slate-400">Độ tin cậy AI: <b class="text-white">${escapeHTML(String(a.confidence))}%</b></span>` : ''}
+                    ${a.risk_score !== undefined && a.risk_score !== '' ? `<span class="text-xs text-slate-400">Risk score: <b class="text-white">${escapeHTML(String(a.risk_score))}</b></span>` : ''}
+                </div>
+                <h4 class="font-bold text-white text-base mb-1">${escapeHTML(a.rule_description)}</h4>
+                <p class="text-xs text-slate-400 mb-4">Agent: <span class="text-blue-400 font-bold">${escapeHTML(a.agent_name)}</span> · Rule: ${escapeHTML(a.rule_id)}${a.mitre_technique ? ` · MITRE: <span class="text-amber-400 font-bold">${escapeHTML(a.mitre_technique)}</span>` : ''}</p>
+                ${incidentBlock}
+                <div class="mb-4">
+                    <p class="text-xs font-bold text-slate-400 mb-1">AI phân tích đầy đủ:</p>
+                    <div class="text-sm text-slate-200 leading-relaxed bg-black/30 p-3 rounded-lg border border-white/5 whitespace-pre-wrap">${escapeHTML(a.analysis)}</div>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 mb-1">Hành động đề xuất:</p>
+                    <div class="text-sm text-slate-300">${renderActionsList(a.recommended_actions)}</div>
+                </div>
+                ${renderSourcesList(a.sources_used)}
+                <div class="mt-4 pt-3 border-t border-white/5">
+                    <p class="text-xs font-bold text-slate-400 mb-1">Log gốc (full_log):</p>
+                    <pre class="text-[11px] text-slate-500 bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap">${escapeHTML(a.full_log || '')}</pre>
+                </div>`;
+
+            // Nút True/False Positive ngay trong modal, giữ đồng bộ với thẻ ngoài dashboard
+            const footer = document.getElementById('alert-detail-footer');
+            let verdictBtns = '';
+            if (a.verdict === 'true_positive') {
+                verdictBtns = `<span class="text-emerald-400 font-bold text-xs mr-auto"><i class="fa fa-check mr-1"></i> Đã đánh giá: True Positive</span>`;
+            } else if (a.verdict === 'false_positive') {
+                verdictBtns = `<span class="text-yellow-400 font-bold text-xs mr-auto"><i class="fa fa-times mr-1"></i> Đã đánh giá: False Positive</span>`;
+            } else {
+                verdictBtns = `
+                    <button onclick="setVerdict(${Number(a.id)}, 'true_positive'); closeAlertDetailModal();" class="mr-auto px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded-md text-[11px] font-bold hover:bg-emerald-500/40 transition">✓ True Positive</button>
+                    <button onclick="setVerdict(${Number(a.id)}, 'false_positive'); closeAlertDetailModal();" class="mr-2 px-3 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-md text-[11px] font-bold hover:bg-yellow-500/40 transition">✕ False Positive</button>`;
+            }
+            footer.innerHTML = verdictBtns + `<button onclick="closeAlertDetailModal()" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white transition">Đóng lại</button>`;
+
+            document.getElementById('alert-detail-modal').classList.remove('hidden');
+        }
+
+        function closeAlertDetailModal() {
+            document.getElementById('alert-detail-modal').classList.add('hidden');
         }
 
         async function setVerdict(alertId, verdictValue) {
@@ -393,21 +1133,35 @@
             fetchDashboard();
         }
 
+        // ==========================================
+        // CÁC MODULE API KHÁC (NL2QUERY, CHAT, VULNS)
+        // ==========================================
         async function generateNL2Query() {
             const q = document.getElementById('query-input').value;
-            if(!q) return;
+            if (!q) return;
             const btn = document.getElementById('btn-nl2q');
             const out = document.getElementById('query-output');
             btn.innerText = "Đang xử lý..."; btn.disabled = true;
+            // TRƯỚC: fetch không có timeout — nếu backend/Ollama treo, nút
+            // "Đang xử lý..." sẽ đứng im vô thời hạn không có phản hồi gì.
+            // Đặt 70s (hơn 60s timeout phía backend 1 chút) để lỗi timeout
+            // thật sự từ backend luôn hiện trước.
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 70000);
             try {
                 const res = await fetch('/api/v1/soc/nl2query', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: q })
+                    body: JSON.stringify({ question: q }),
+                    signal: controller.signal
                 });
                 const data = await res.json();
-                if(data.error) { out.innerHTML = `<span class="text-red-400">${data.explanation}</span>`; } 
+                if (data.error) { out.innerHTML = `<span class="text-red-400">${escapeHTML(data.explanation)}</span>`; }
                 else { out.innerText = JSON.stringify(data.query, null, 2) + "\n\n/* " + data.explanation + " */"; }
-            } catch(e) { out.innerText = "Lỗi kết nối API"; }
+            } catch (e) {
+                out.innerText = e.name === 'AbortError' ? "Hết thời gian chờ phản hồi từ server." : "Lỗi kết nối API";
+            } finally {
+                clearTimeout(timeoutId);
+            }
             btn.innerText = "⚡ Sinh Query"; btn.disabled = false;
         }
 
@@ -423,37 +1177,117 @@
             });
         }
 
+        // --- HỆ THỐNG ĐA PHIÊN CHAT ---
+        let chatSessions = [];
+        let currentSessionId = null;
+
+        function initChatSystem() {
+            const savedSessions = localStorage.getItem('soc_chat_sessions');
+            if (savedSessions) {
+                chatSessions = JSON.parse(savedSessions);
+            } else {
+                chatSessions = [];
+            }
+
+            if (chatSessions.length === 0) {
+                createNewChat(false);
+            } else {
+                currentSessionId = chatSessions[0].id;
+                renderSidebarChats();
+                renderChatHistory();
+            }
+        }
+
+        function createNewChat(switchTabFlag = true) {
+            const newId = Date.now().toString();
+            chatSessions.unshift({ id: newId, title: 'Đoạn chat mới', messages: [] });
+            currentSessionId = newId;
+            saveChats(); renderSidebarChats(); renderChatHistory();
+            if (switchTabFlag) switchTab('chat');
+        }
+
+        function selectChat(id) {
+            currentSessionId = id;
+            renderSidebarChats(); renderChatHistory(); switchTab('chat');
+        }
+
+        function saveChats() { localStorage.setItem('soc_chat_sessions', JSON.stringify(chatSessions)); }
+
+        function renderSidebarChats() {
+            const listDiv = document.getElementById('sidebar-chat-list');
+            if (!listDiv) return;
+            listDiv.innerHTML = '';
+            chatSessions.forEach(session => {
+                const isActive = session.id === currentSessionId;
+                const activeClass = isActive ? 'chat-session-item active' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200';
+                listDiv.insertAdjacentHTML('beforeend', `
+                    <div onclick="selectChat('${session.id}')" class="cursor-pointer text-xs px-3 py-2.5 rounded-lg truncate transition-all mb-1 flex items-center ${activeClass}">
+                        <i class="fa-regular fa-message mr-2.5 opacity-70"></i> 
+                        <span class="truncate">${escapeHTML(session.title)}</span>
+                    </div>
+                `);
+            });
+        }
+
+        function renderChatHistory() {
+            const historyDiv = document.getElementById('chat-history');
+            historyDiv.innerHTML = '';
+            const currentSession = chatSessions.find(s => s.id === currentSessionId);
+            if (!currentSession || currentSession.messages.length === 0) {
+                historyDiv.innerHTML = '<div class="text-slate-400 text-sm italic text-center mt-10 mb-4 opacity-50"><i class="fa-solid fa-bolt text-2xl mb-3 block text-purple-400/50"></i> AI đã sẵn sàng hỗ trợ bạn phân tích sự cố.</div>';
+                return;
+            }
+
+            currentSession.messages.forEach(msg => {
+                if (msg.role === 'user') {
+                    historyDiv.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-end">
+                            <div class="bg-blue-600/30 border border-blue-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tr-sm max-w-[80%]">${escapeHTML(msg.content)}</div>
+                        </div>`);
+                } else if (msg.role === 'assistant') {
+                    historyDiv.insertAdjacentHTML('beforeend', `
+                        <div class="flex justify-start">
+                            <div class="bg-purple-600/20 border border-purple-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tl-sm max-w-[80%] whitespace-pre-wrap">${escapeHTML(msg.content)}</div>
+                        </div>`);
+                }
+            });
+            historyDiv.scrollTop = historyDiv.scrollHeight;
+        }
+
+        function deleteCurrentChat() {
+            if (confirm("Bạn có chắc chắn muốn xóa đoạn chat này không?")) {
+                chatSessions = chatSessions.filter(s => s.id !== currentSessionId);
+                if (chatSessions.length === 0) createNewChat(false);
+                else currentSessionId = chatSessions[0].id;
+                saveChats(); renderSidebarChats(); renderChatHistory();
+            }
+        }
+
         async function sendChat() {
             const inp = document.getElementById('chat-input');
             const btn = document.getElementById('btn-chat');
             const q = inp.value.trim();
-            if(!q) return;
-            
+            if (!q) return;
+
             inp.value = ''; inp.disabled = true; btn.disabled = true;
-            
+
             const historyDiv = document.getElementById('chat-history');
             const alertIdVal = document.getElementById('chat-alert-select').value;
             const alertId = alertIdVal ? parseInt(alertIdVal) : null;
-            
             const currentSession = chatSessions.find(s => s.id === currentSessionId);
 
-            // Tự động đặt tên cho session nếu đây là câu hỏi đầu tiên
             if (currentSession.messages.length === 0) {
                 currentSession.title = q.length > 25 ? q.substring(0, 25) + '...' : q;
                 renderSidebarChats();
+                historyDiv.innerHTML = '';
             }
 
-            // In tin nhắn của User
-            // Xóa thông báo mờ nếu có
-            if (currentSession.messages.length === 0) historyDiv.innerHTML = '';
-            
             historyDiv.insertAdjacentHTML('beforeend', `
                 <div class="flex justify-end">
                     <div class="bg-blue-600/30 border border-blue-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tr-sm max-w-[80%]">${escapeHTML(q)}</div>
                 </div>`);
             historyDiv.scrollTop = historyDiv.scrollHeight;
 
-            // In hoạt ảnh AI đang suy nghĩ
             const thinkingId = 'thinking-' + Date.now();
             historyDiv.insertAdjacentHTML('beforeend', `
                 <div id="${thinkingId}" class="flex justify-start">
@@ -466,39 +1300,282 @@
             try {
                 const res = await fetch('/api/v1/soc/chat', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: q, history: currentSession.messages, alert_id: alertId }) 
+                    body: JSON.stringify({ question: q, history: currentSession.messages, alert_id: alertId })
                 });
                 const data = await res.json();
-                
+
                 currentSession.messages.push({ role: 'user', content: q });
                 currentSession.messages.push({ role: 'assistant', content: data.answer });
-                saveChats(); // Lưu vào localStorage
-                
+                saveChats();
+
                 document.getElementById(thinkingId).remove();
-                
                 historyDiv.insertAdjacentHTML('beforeend', `
                     <div class="flex justify-start">
-                        <div class="bg-purple-600/20 border border-purple-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tl-sm max-w-[80%] whitespace-pre-wrap">${data.answer}</div>
+                        <div class="bg-purple-600/20 border border-purple-500/30 text-white text-sm px-4 py-2 rounded-2xl rounded-tl-sm max-w-[80%] whitespace-pre-wrap">${escapeHTML(data.answer)}</div>
                     </div>`);
                 historyDiv.scrollTop = historyDiv.scrollHeight;
-                
             } catch (e) {
                 document.getElementById(thinkingId).remove();
                 historyDiv.insertAdjacentHTML('beforeend', `
                     <div class="flex justify-start">
-                        <div class="bg-red-500/20 border border-red-500/50 text-red-200 text-sm px-4 py-2 rounded-2xl rounded-tl-sm">⚠️ Lỗi kết nối AI: ${e.message}</div>
+                        <div class="bg-red-500/20 border border-red-500/50 text-red-200 text-sm px-4 py-2 rounded-2xl rounded-tl-sm">⚠️ Lỗi kết nối AI: ${escapeHTML(e.message)}</div>
                     </div>`);
             } finally {
                 inp.disabled = false; btn.disabled = false; inp.focus();
             }
         }
-        
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+
+        // --- HỆ THỐNG VULNERABILITIES ---
+        const VULN_API = '/api/v1/soc/vulns';
+        const SEV_CLASS = {
+            Critical: 'bg-red-500/20 text-red-400 border-red-500/50',
+            High: 'bg-orange-500/20 text-orange-400 border-orange-500/50',
+            Medium: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50',
+            Low: 'bg-green-500/20 text-green-400 border-green-500/50',
+        };
+
+        function vulnAiCell(v) {
+            let html = '';
+            if (v.ai) {
+                html += `
+                    <div class="mb-1"><span class="font-black text-[10px] bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/30 uppercase tracking-widest mr-1">${vulnEsc(v.ai.priority)}</span> 
+                    <span class="text-slate-200 text-xs">${vulnEsc(v.ai.summary)}</span></div>
+                    <div class="text-emerald-400/80 text-[11px] italic mt-1.5 border-l-2 border-emerald-500/30 pl-2">Gợi ý: ${vulnEsc(v.ai.action)}</div>`;
+            } else {
+                html += `<button class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/50 rounded px-3 py-1 text-xs transition mb-1" onclick="explainVuln('${vulnEsc(v.cve_id)}', this)"><i class="fa-solid fa-bolt mr-1"></i> Phân tích</button><br>`;
+            }
+
+            // Nút tạo Kế hoạch khắc phục chi tiết
+            const safePackage = vulnEsc((v.packages || []).join(', '));
+            html += `<button class="mt-1 bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 border border-purple-500/50 rounded px-3 py-1 text-xs transition" onclick="openRemediationModal('${vulnEsc(v.cve_id)}', '${vulnEsc(v.severity)}', ${v.score || 0}, '${safePackage}')">
+                <i class="fa-solid fa-notes-medical mr-1"></i> Lập Kế hoạch
+            </button>`;
+            return html;
         }
+
+        function vulnEsc(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // --- PHÂN TRANG CVE: 20/trang, giống tab Alerts ---
+        const VULN_PAGE_SIZE = 20;
+        let vulnCurrentPage = 1;
+        let vulnLastTotal = 0;
+
+        function vulnFilterChanged() {
+            vulnCurrentPage = 1; // đổi mức độ lọc thì quay về trang 1
+            loadVulns();
+        }
+
+        function goToVulnPage(page) {
+            const totalPages = Math.max(1, Math.ceil(vulnLastTotal / VULN_PAGE_SIZE));
+            if (page < 1 || page > totalPages) return;
+            vulnCurrentPage = page;
+            loadVulns();
+            document.getElementById('vuln-rows').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderVulnPagination(total) {
+            vulnLastTotal = total;
+            const bar = document.getElementById('vuln-pagination-bar');
+            const totalPages = Math.max(1, Math.ceil(total / VULN_PAGE_SIZE));
+
+            if (total <= VULN_PAGE_SIZE) {
+                bar.classList.add('hidden');
+                return;
+            }
+            bar.classList.remove('hidden');
+
+            const startItem = total === 0 ? 0 : (vulnCurrentPage - 1) * VULN_PAGE_SIZE + 1;
+            const endItem = Math.min(vulnCurrentPage * VULN_PAGE_SIZE, total);
+            document.getElementById('vuln-pagination-info').textContent =
+                `Hiển thị ${startItem}–${endItem} / ${total} CVE · Trang ${vulnCurrentPage}/${totalPages}`;
+
+            document.getElementById('vuln-pg-prev').disabled = vulnCurrentPage <= 1;
+            document.getElementById('vuln-pg-next').disabled = vulnCurrentPage >= totalPages;
+
+            const pages = [];
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || Math.abs(p - vulnCurrentPage) <= 1) pages.push(p);
+                else if (pages[pages.length - 1] !== '…') pages.push('…');
+            }
+
+            document.getElementById('vuln-pg-numbers').innerHTML = pages.map(p => {
+                if (p === '…') return `<span class="px-2 text-slate-600">…</span>`;
+                const active = p === vulnCurrentPage;
+                return `<button onclick="goToVulnPage(${p})"
+                    class="min-w-[32px] px-2 py-1.5 rounded-md border text-xs font-bold transition ${active
+                        ? 'bg-red-500/20 border-red-500 text-red-400'
+                        : 'border-white/10 bg-white/5 hover:bg-white/10 text-slate-300'}">${p}</button>`;
+            }).join('');
+        }
+
+        async function loadVulns() {
+            const status = document.getElementById('vuln-status');
+            const sev = document.getElementById('vuln-severity').value;
+            status.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải dữ liệu từ Wazuh Indexer...';
+            try {
+                // TRƯỚC: limit=200 tải hết 1 lần không phân trang. Giờ chỉ
+                // lấy đúng 1 trang (20 CVE) theo vulnCurrentPage.
+                const offset = (vulnCurrentPage - 1) * VULN_PAGE_SIZE;
+                let url = `${VULN_API}?limit=${VULN_PAGE_SIZE}&offset=${offset}`;
+                if (sev) url += `&severity=${encodeURIComponent(sev)}`;
+
+                const res = await fetch(url);
+                if (!res.ok) throw new Error((await res.json()).detail || res.status);
+                const data = await res.json();
+
+                document.getElementById('vuln-rows').innerHTML = data.items.map(v => `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="px-4 py-3 font-mono text-xs text-blue-300 font-bold">${vulnEsc(v.cve_id)}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${SEV_CLASS[v.severity] || 'bg-slate-700'}">${vulnEsc(v.severity)}</span></td>
+                        <td class="px-4 py-3 font-bold text-slate-200">${vulnEsc(v.score)}</td>
+                        <td class="px-4 py-3 text-xs text-slate-400 max-w-[150px] truncate" title="${vulnEsc(v.packages.join(', '))}">${vulnEsc(v.packages.join(', '))}</td>
+                        <td class="px-4 py-3 text-xs text-slate-400">${vulnEsc(v.agents.join(', '))}</td>
+                        <td class="px-4 py-3 max-w-[300px] whitespace-normal">${vulnAiCell(v)}</td>
+                    </tr>`).join('') || `<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500 italic">Không có CVE nào khớp bộ lọc.</td></tr>`;
+                status.innerHTML = data.stale
+                    // TRƯỚC: không có khái niệm "stale" — nếu Wazuh Indexer
+                    // không kết nối được thì cả tab báo lỗi trắng trơn, dù
+                    // backend giờ đã có thể trả về bản cache gần nhất.
+                    ? `<span class="text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Không kết nối được Wazuh Indexer — đang hiển thị ${data.total} CVE từ bản cache lúc ${vulnEsc(data.cached_at)}.</span>`
+                    : `<span class="text-emerald-400 font-bold">Đã tải thành công ${data.total} CVE.</span>`;
+                renderVulnPagination(data.total);
+            } catch (e) {
+                status.innerHTML = `<span class="text-red-400">Lỗi: ${vulnEsc(e.message)}</span>`;
+            }
+        }
+
+        async function explainVuln(cve, btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang phân tích...';
+            try {
+                const res = await fetch(VULN_API + '/explain', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cve_id: cve }),
+                });
+                if (!res.ok) throw new Error((await res.json()).detail || res.status);
+                loadVulns();
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = 'Lỗi, thử lại';
+                document.getElementById('vuln-status').innerHTML = `<span class="text-red-400">Lỗi phân tích ${vulnEsc(cve)}: ${vulnEsc(e.message)}</span>`;
+            }
+        }
+
+        async function explainTopVulns() {
+            const status = document.getElementById('vuln-status');
+            try {
+                const res = await fetch(VULN_API + '/explain-top?n=5', { method: 'POST' });
+                if (!res.ok) throw new Error((await res.json()).detail || res.status);
+                const data = await res.json();
+                status.innerHTML = data.queued.length
+                    ? `<span class="text-orange-400 font-bold"><i class="fa-solid fa-gear fa-spin mr-1"></i> Đang phân tích ngầm ${data.queued.length} CVE. Bấm "Tải lại" sau 1-2 phút để xem kết quả.</span>`
+                    : '<span class="text-emerald-400">Các CVE Critical/High đều đã có đánh giá.</span>';
+            } catch (e) {
+                status.innerHTML = `<span class="text-red-400">Lỗi: ${vulnEsc(e.message)}</span>`;
+            }
+        }
+
+        // ==========================================
+        // INIT VÀ KHỞI CHẠY HỆ THỐNG
+        // ==========================================
+        initChatSystem();
+
+        // Cấu hình mặc định khi vào trang web là "7 ngày gần nhất"
+        (function initRange() {
+            const r = computePreset('last7d');
+            timeRange = { preset: 'last7d', from: r.from, to: r.to };
+            syncSiemLabels();
+        })();
 
         fetchDashboard();
         setInterval(fetchDashboard, 5000);
+        // --- THANH TRẠNG THÁI: cho biết đang gom, đang cho AI phân tích hay đã xong ---
+        let lastDoneSeen = null;
+        async function fetchPipelineStatus() {
+            const bar = document.getElementById('pipeline-bar');
+            if (!bar) return;
+            try {
+                const r = await fetch('/api/v1/soc/pipeline-status');
+                const s = await r.json();
+                const total = s.debounce_seconds || 30;
+                const parts = [];
+
+                (s.analyzing || []).forEach(j => {
+                    parts.push(`<span class="flex items-center gap-2 text-purple-300"><i class="fa-solid fa-spinner fa-spin"></i> AI đang phân tích sự cố từ <b class="font-mono">${escapeHTML(j.key)}</b> (${Number(j.alert_count)} cảnh báo) · đã chạy ${Number(j.elapsed)} giây</span>`);
+                });
+
+                (s.grouping || []).forEach(g => {
+                    const pct = Math.min(100, Math.max(0, Math.round(100 * (1 - g.seconds_left / total))));
+                    parts.push(`<span class="flex items-center gap-2 text-yellow-300"><i class="fa fa-layer-group"></i> Đang gom <b class="font-mono">${escapeHTML(g.key)}</b>: ${Number(g.alert_count)} cảnh báo · chốt sau ${Number(g.seconds_left)} giây
+                        <span class="inline-block w-24 h-1.5 bg-white/10 rounded"><span class="block h-1.5 bg-yellow-400 rounded" style="width:${pct}%"></span></span></span>`);
+                });
+
+                if (!(s.analyzing || []).length && !(s.grouping || []).length) {
+                    parts.push(`<span class="flex items-center gap-2 text-emerald-400"><i class="fa fa-circle text-[8px]"></i> Hệ thống rảnh, đang chờ cảnh báo mới</span>`);
+                }
+
+                if (s.last_done) {
+                    const t = String(s.last_done.finished_at).replace('T', ' ').slice(11, 19);
+                    const bad = s.last_done.ai_failed
+                        ? ` <span class="text-red-400 font-bold">· AI bị lỗi, đang dùng kết quả mặc định</span>` : '';
+                    parts.push(`<span class="text-slate-400">Vừa xong lúc ${escapeHTML(t)}: <b class="font-mono">${escapeHTML(s.last_done.key)}</b> (${Number(s.last_done.alert_count)} cảnh báo, mất ${Number(s.last_done.took)} giây)${bad}</span>`);
+                }
+                bar.innerHTML = parts.join('');
+
+                // Có sự cố mới xử lý xong thì tải lại danh sách ngay, khỏi chờ 5 giây
+                if (s.last_done && s.last_done.finished_at !== lastDoneSeen) {
+                    if (lastDoneSeen !== null) fetchDashboard();
+                    lastDoneSeen = s.last_done.finished_at;
+                }
+            } catch (e) {
+                bar.innerHTML = `<span class="text-red-400"><i class="fa fa-triangle-exclamation mr-1"></i> Mất kết nối tới máy chủ</span>`;
+            }
+        }
+        fetchPipelineStatus();
+        setInterval(fetchPipelineStatus, 2000);
+        // ==========================================
+        // REMEDIATION PLAN (KẾ HOẠCH KHẮC PHỤC)
+        // ==========================================
+        function closeRemediationModal() {
+            document.getElementById('remediation-modal').classList.add('hidden');
+        }
+
+        async function openRemediationModal(cve_id, severity, cvss, package) {
+            const modal = document.getElementById('remediation-modal');
+            const infoDiv = document.getElementById('remediation-cve-info');
+            const contentDiv = document.getElementById('remediation-content');
+
+            // Hiển thị Modal & set loading state
+            modal.classList.remove('hidden');
+            infoDiv.innerHTML = `
+                <span class="bg-blue-500/20 text-blue-400 border border-blue-500/50 px-2 py-1 rounded text-xs font-bold font-mono">${cve_id}</span>
+                <span class="bg-red-500/20 text-red-400 border border-red-500/50 px-2 py-1 rounded text-xs font-bold uppercase">${severity} (CVSS: ${cvss})</span>
+                <span class="bg-white/5 text-slate-300 border border-white/10 px-2 py-1 rounded text-xs truncate max-w-[200px]" title="${package}">${package}</span>
+            `;
+            contentDiv.innerHTML = `<div class="flex items-center gap-2 text-purple-400 py-10 justify-center"><i class="fa-solid fa-spinner fa-spin text-xl"></i> <span>AI đang soạn thảo Kế hoạch khắc phục...</span></div>`;
+
+            // Gọi API
+            try {
+                const res = await fetch('/api/v1/soc/cve/remediation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cve_id: cve_id, severity: severity, cvss: parseFloat(cvss), package: package })
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    contentDiv.innerHTML = data.remediation_plan;
+                } else {
+                    contentDiv.innerHTML = data.remediation_plan; // Chứa câu thông báo lỗi
+                }
+            } catch (e) {
+                contentDiv.innerHTML = `<span class="text-red-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Mất kết nối tới Server. Chi tiết: ${e.message}</span>`;
+            }
+        }
     </script>
 </body>
+
 </html>

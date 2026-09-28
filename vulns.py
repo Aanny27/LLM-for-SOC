@@ -32,8 +32,9 @@ from typing import Optional
 import requests
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from pydantic import BaseModel
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+# RAG dùng chung với gateway.py/retriever.py (xem shared_rag.py) — tránh
+# load HuggingFaceEmbeddings thêm 1 lần nữa riêng trong file này
+from shared_rag import get_vectorstore
 import os
 
 log = logging.getLogger("vulns")
@@ -73,6 +74,62 @@ def _db() -> sqlite3.Connection:
            )"""
     )
     return conn
+
+
+# ------------------------------------------------------- Cache danh sách CVE
+# vulns.py trước đây KHÔNG lưu danh sách CVE ở đâu cả — mỗi lần mở tab đều
+# phải hỏi trực tiếp Wazuh Indexer (thường chạy trong 1 VM riêng). VM tắt
+# là cả tab CVE mất luôn dữ liệu. Thêm 1 bảng cache: mỗi lần lấy được dữ
+# liệu SỐNG (không lọc severity/agent) thì lưu lại; khi Wazuh Indexer không
+# kết nối được thì dùng bản cache gần nhất, lọc lại severity/agent trên đó.
+def _cache_db() -> sqlite3.Connection:
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS vuln_list_cache (
+               id         INTEGER PRIMARY KEY CHECK (id = 1),
+               items_json TEXT NOT NULL,
+               cached_at  TEXT NOT NULL
+           )"""
+    )
+    return conn
+
+
+def _save_cache(items: list[dict]) -> None:
+    conn = _cache_db()
+    try:
+        with conn:
+            conn.execute(
+                "INSERT INTO vuln_list_cache (id, items_json, cached_at) VALUES (1, ?, ?) "
+                "ON CONFLICT(id) DO UPDATE SET items_json = excluded.items_json, cached_at = excluded.cached_at",
+                (json.dumps(items, ensure_ascii=False), time.strftime("%Y-%m-%d %H:%M:%S")),
+            )
+    finally:
+        conn.close()
+
+
+def _load_cache() -> tuple[list[dict], Optional[str]]:
+    conn = _cache_db()
+    try:
+        row = conn.execute("SELECT items_json, cached_at FROM vuln_list_cache WHERE id = 1").fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return [], None
+    return json.loads(row[0]), row[1]
+
+
+def _filter_items(items: list[dict], severity: list[str] = None, agent: str = None, cve_id: str = None) -> list[dict]:
+    """Lọc lại 1 danh sách item đã có sẵn trong bộ nhớ (dùng cho dữ liệu cache,
+    vì lúc đó không còn gọi được Wazuh Indexer để lọc bằng query DSL nữa)."""
+    out = items
+    if severity:
+        sevset = set(severity)
+        out = [i for i in out if i["severity"] in sevset]
+    if agent:
+        out = [i for i in out if agent in i["agents"]]
+    if cve_id:
+        out = [i for i in out if i["cve_id"] == cve_id]
+    return out
 
 
 def _get_cached(cve_ids: list[str]) -> dict:
@@ -191,12 +248,8 @@ Trả về JSON đúng dạng sau, không thêm gì khác:
 {{"summary": "<2-3 câu tiếng Việt: lỗ hổng là gì, rủi ro với hệ thống>", "priority": "P1|P2|P3|P4", "action": "<1-2 câu tiếng Việt: cách khắc phục, ví dụ cập nhật gói lên bản đã vá>"}}
 Quy ước ưu tiên: P1 = vá ngay, P2 = trong tuần, P3 = theo lịch bảo trì, P4 = theo dõi."""
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
-
 try:
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2")
-    vectorstore = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings, collection_name="soc_knowledge")
+    vectorstore = get_vectorstore()
     vuln_retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 2})
 except Exception as e:
     vuln_retriever = None
@@ -267,16 +320,46 @@ class ExplainReq(BaseModel):
 def list_vulns(
     severity: Optional[list[str]] = Query(None),
     agent: Optional[str] = None,
-    limit: int = Query(200, ge=1, le=1000),
+    # PHÂN TRANG: limit mặc định 20/trang (giống tab Alerts), offset xác
+    # định trang nào. TRƯỚC: limit mặc định 200 và frontend hiển thị hết
+    # 1 lần, không có phân trang -> danh sách dài dằng dặc khi có nhiều CVE.
+    limit: int = Query(20, ge=1, le=200),
+    offset: int = Query(0, ge=0, description="Số bản ghi bỏ qua, dùng cho phân trang"),
 ):
     sev = [s.capitalize() for s in severity] if severity else None
-    items = group_by_cve(fetch_vulns(severity=sev, agent=agent))
+    stale = False
+    cached_at = None
+    try:
+        items = group_by_cve(fetch_vulns(severity=sev, agent=agent))
+        # Chỉ ghi cache khi lấy được TOÀN BỘ dữ liệu (không lọc severity/
+        # agent) — để bản cache luôn đầy đủ mọi mức độ, dùng lọc lại được
+        # cho bất kỳ yêu cầu nào sau này kể cả khi offline.
+        if not sev and not agent:
+            _save_cache(items)
+    except HTTPException:
+        # Wazuh Indexer không kết nối được (vd. tắt VM lab) -> dùng bản
+        # cache gần nhất, lọc lại severity/agent trên đó thay vì để cả tab
+        # CVE báo lỗi trắng trơn.
+        cached_items, cached_at = _load_cache()
+        if not cached_items:
+            raise  # chưa từng cache thành công lần nào, không có gì để trả về
+        items = _filter_items(cached_items, severity=sev, agent=agent)
+        stale = True
+
     total = len(items)
-    items = items[:limit]
-    cached = _get_cached([i["cve_id"] for i in items])
-    for i in items:
+    # Cắt đúng 1 trang SAU khi đã gộp theo CVE ID và sắp xếp theo mức độ —
+    # phải cắt sau group_by_cve/sort, không phải cắt trước, để thứ tự và số
+    # trang luôn nhất quán.
+    page_items = items[offset: offset + limit]
+    cached = _get_cached([i["cve_id"] for i in page_items])
+    for i in page_items:
         i["ai"] = cached.get(i["cve_id"])
-    return {"total": total, "items": items}
+    return {
+        "total": total, "items": page_items, "limit": limit, "offset": offset,
+        # "stale" = True nghĩa là dữ liệu này lấy từ cache (Wazuh Indexer
+        # đang không kết nối được), kèm thời điểm cache được lưu.
+        "stale": stale, "cached_at": cached_at,
+    }
 
 
 @router.post("/vulns/explain")
@@ -284,9 +367,16 @@ def explain_vuln(req: ExplainReq):
     cve = req.cve_id.strip().upper()
     if not CVE_RE.match(cve):
         raise HTTPException(400, "cve_id không đúng định dạng CVE-YYYY-NNNN")
-    items = group_by_cve(fetch_vulns(cve_id=cve))
+    try:
+        items = group_by_cve(fetch_vulns(cve_id=cve))
+    except HTTPException:
+        # Wazuh không kết nối được -> vẫn thử tìm CVE này trong bản cache
+        # gần nhất, để LLM (chạy local, không phụ thuộc VM) vẫn phân tích
+        # được như bình thường.
+        cached_items, _ = _load_cache()
+        items = _filter_items(cached_items, cve_id=cve)
     if not items:
-        raise HTTPException(404, f"Wazuh không có {cve} trong dữ liệu lỗ hổng")
+        raise HTTPException(404, f"Không tìm thấy {cve} (kể cả trong bản cache gần nhất)")
     return {"cve_id": cve, "ai": _explain(items[0])}
 
 
@@ -300,7 +390,11 @@ def _explain_batch(items: list[dict]):
 
 @router.post("/vulns/explain-top")
 def explain_top(background: BackgroundTasks, n: int = Query(5, ge=1, le=20)):
-    items = group_by_cve(fetch_vulns(severity=["Critical", "High"]))
+    try:
+        items = group_by_cve(fetch_vulns(severity=["Critical", "High"]))
+    except HTTPException:
+        cached_items, _ = _load_cache()
+        items = _filter_items(cached_items, severity=["Critical", "High"])
     cached = _get_cached([i["cve_id"] for i in items])
     todo = [i for i in items if i["cve_id"] not in cached][:n]
     background.add_task(_explain_batch, todo)

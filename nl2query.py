@@ -2,8 +2,21 @@
 from langchain_ollama import ChatOllama
 import json
 import re
+import httpx
 
-llm = ChatOllama(model="qwen2.5:7b", temperature=0.1)
+# TRƯỚC: llm = ChatOllama(model="qwen2.5:7b", temperature=0.1)
+# Thiếu 2 thứ quan trọng:
+#  1. format="json"  -> không ép Ollama trả đúng JSON, model dễ chèn thêm
+#     chữ thừa quanh JSON dù prompt đã dặn "CHỈ trả JSON".
+#  2. timeout         -> nếu Ollama đang bận (vd. đang phân tích alert khác),
+#     lời gọi này có thể treo vô thời hạn, không bao giờ fallback.
+llm = ChatOllama(
+    model="qwen2.5:7b",
+    temperature=0.1,
+    format="json",
+    num_predict=400,  # query DSL + giải thích ngắn, không cần dài
+    client_kwargs={"timeout": 60.0},
+)
 
 WAZUH_SCHEMA_HINT = """
 Schema chính của index `wazuh-alerts-*` trên Wazuh Indexer (OpenSearch):
@@ -54,9 +67,18 @@ def generate_query(question: str) -> dict:
         if "query" not in parsed:
             raise ValueError("Output thiếu field 'query'.")
         return parsed
+    except httpx.TimeoutException:
+        # Bắt riêng lỗi timeout để báo rõ nguyên nhân thay vì thông báo
+        # chung chung — timeout thường nghĩa là Ollama đang bận việc khác
+        # (vd. đang phân tích alert), không phải do câu hỏi sai.
+        return {
+            "query": {},
+            "explanation": "[Lỗi sinh query] Ollama không phản hồi trong 60s, có thể đang bận xử lý việc khác. Thử lại sau ít giây.",
+            "error": True,
+        }
     except Exception as e:
         return {
             "query": {},
-            "explanation": f"[Lỗi sinh query] {e}. Thử diễn đạt câu hỏi cụ thể hơn.",
+            "explanation": f"[Lỗi sinh query] {type(e).__name__}: {e}. Thử diễn đạt câu hỏi cụ thể hơn.",
             "error": True,
         }

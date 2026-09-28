@@ -1,23 +1,9 @@
-import os
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import ChatOllama
-
 from soc_verdict_escalation import build_verdict_prompt, parse_verdict_response
+from shared_rag import CHROMA_PATH, get_vectorstore
 
-# 1. Tự động lùi 1 cấp thư mục để trỏ đúng vào chroma_db
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "..", "chroma_db")
-
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-)
-
-vectorstore = Chroma(
-    persist_directory=DB_PATH,
-    embedding_function=embeddings,
-    collection_name="soc_knowledge"
-)
+DB_PATH = CHROMA_PATH
+vectorstore = get_vectorstore()
 
 # Chỉ WARN, không sys.exit()
 _count = vectorstore._collection.count()
