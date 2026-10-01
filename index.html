@@ -389,7 +389,14 @@
 
                 <!-- INFO RANGE CHOSEN -->
                 <div class="flex items-center justify-between border-b border-white/10 pb-2 mt-6">
-                    <h3 class="font-bold text-white text-lg">Phân tích Alerts (Live)</h3>
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-bold text-white text-lg">Phân tích Alerts (Live)</h3>
+                        <button type="button" id="btn-blind" onclick="toggleBlindMode()"
+                            title="Ẩn phán quyết và phần phân tích của AI để gán nhãn khách quan"
+                            class="px-3 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-slate-300 transition">
+                            <i class="fa-regular fa-eye-slash mr-1"></i> Gán nhãn mù: Tắt
+                        </button>
+                    </div>
                     <div
                         class="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 font-mono text-xs text-slate-400 shadow-inner">
                         <span class="font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded" id="query-hits">0
@@ -896,6 +903,17 @@
                         `;
                 }
 
+                // Phán quyết do AI tự đưa ra (cột ai_verdict), tách riêng với nhãn của người ở trên
+                const aiMap = {
+                    true_positive: ['bg-emerald-500/15 text-emerald-300 border-emerald-500/40', 'AI đề xuất: Tấn công thật'],
+                    false_positive: ['bg-yellow-500/15 text-yellow-300 border-yellow-500/40', 'AI đề xuất: Báo nhầm'],
+                    unknown: ['bg-slate-500/15 text-slate-300 border-slate-500/40', 'AI chưa kết luận'],
+                };
+                const [aiCls, aiText] = aiMap[a.ai_verdict] || aiMap.unknown;
+                const aiVerdictHtml = (a.ai_verdict && !blindMode)
+                    ? `<span class="px-2 py-1 rounded border text-[10px] font-bold mr-auto ${aiCls}" title="${escapeHTML(a.ai_verdict_reason || '')}">${aiText}</span>`
+                    : '';
+
                 // Sự cố gộp: nhiều cảnh báo cùng nguồn được gom thành 1 thẻ
                 const n = Number(a.alert_count) || 1;
                 let incidentHtml = '';
@@ -921,11 +939,12 @@
                             <p class="text-xs text-slate-400 mb-3">Agent: <span class="text-blue-400 font-bold">${escapeHTML(a.agent_name)}</span> · Rule: ${escapeHTML(a.rule_id)}</p>
                             ${incidentHtml}
                             <div class="bg-black/30 p-3 rounded-lg border border-white/5 mb-4">
-                                <div class="text-xs text-slate-300 line-clamp-3"><strong>AI Phân tích:</strong> ${escapeHTML(a.analysis)}</div>
+                                <div class="text-xs text-slate-300 line-clamp-3"><strong>AI Phân tích:</strong> ${blindMode ? '<span class="italic text-slate-500">Đã ẩn (chế độ gán nhãn mù) — bấm "Xem đầy đủ" để xem log gốc.</span>' : escapeHTML(a.analysis)}</div>
                                 <button onclick="openAlertDetailModal(${Number(a.id)})" class="mt-2 text-[11px] font-bold text-blue-400 hover:text-blue-300 transition"><i class="fa-solid fa-up-right-and-down-left-from-center mr-1"></i>Xem đầy đủ</button>
                             </div>
                         </div>
                         <div class="flex gap-2 items-center border-t border-white/5 pt-3 mt-auto">
+                            ${aiVerdictHtml}
                             ${verdictHtml}
                         </div>
                     </div>`;
@@ -945,6 +964,18 @@
         // --- PHÂN TRANG: 20 alert/trang ---
         const PAGE_SIZE = 20;
         let currentPage = 1;
+
+        // --- CHẾ ĐỘ GÁN NHÃN MÙ: ẩn phán quyết + phân tích của AI trên thẻ,
+        // để người gán nhãn Dương tính thật/giả không bị AI ảnh hưởng.
+        let blindMode = false;
+        function toggleBlindMode() {
+            blindMode = !blindMode;
+            const b = document.getElementById('btn-blind');
+            b.innerHTML = `<i class="fa-regular ${blindMode ? 'fa-eye' : 'fa-eye-slash'} mr-1"></i> Gán nhãn mù: ${blindMode ? 'Bật' : 'Tắt'}`;
+            b.classList.toggle('border-purple-500/60', blindMode);
+            b.classList.toggle('text-purple-300', blindMode);
+            renderFilteredDashboard();
+        }
 
         let dashDebounce;
         function debounceFetchDashboard() {

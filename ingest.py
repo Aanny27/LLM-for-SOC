@@ -2,8 +2,13 @@ import os
 import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, DirectoryLoader
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
+
+# Dùng chung embeddings (Ollama) + đường dẫn Chroma với gateway.py/vulns.py,
+# thay vì tự tạo HuggingFaceEmbeddings riêng (tránh lỗi torch bị Windows chặn,
+# và tránh lệch model nhúng giữa lúc ingest và lúc truy vấn).
+from shared_rag import embeddings, CHROMA_PATH, COLLECTION_NAME
+
 
 def clean_markdown(text: str) -> str:
     text = re.sub(r'!\[.*?\]\(.*?\)', '', text)           # ảnh, badge
@@ -92,18 +97,13 @@ if __name__ == "__main__":
     md_chunks = char_splitter.split_documents(all_md_sections)
     chunks = pdf_chunks + md_chunks
 
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-    )
-    
     print("[*] Đang lưu vào ChromaDB...")
-    
-    # Lưu ChromaDB vào đúng thư mục Code
-    db_path = os.path.join(BASE_DIR, "chroma_db")
+
+    # Lưu vào đúng thư mục/collection mà shared_rag.py dùng chung với gateway.py/vulns.py
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
-        persist_directory=db_path,
-        collection_name="soc_knowledge"
+        persist_directory=CHROMA_PATH,
+        collection_name=COLLECTION_NAME
     )
     print(f"[+] Hoàn tất! Ingested {len(chunks)} chunks vào ChromaDB (PDF: {len(pdf_chunks)}, MD: {len(md_chunks)}).")

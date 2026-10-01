@@ -1,37 +1,41 @@
 """
-shared_rag.py — embedding model + ChromaDB vectorstore, loaded ONCE.
+shared_rag.py — mô hình nhúng văn bản + kho vector ChromaDB, chỉ nạp MỘT LẦN.
 
-Problem this fixes: gateway.py, retriever.py and vulns.py each used to
-call HuggingFaceEmbeddings(...) independently, so the model weights were
-loaded 3 separate times on every server start (slow, wastes RAM).
-retriever.py also pointed at "../chroma_db" (one folder up) instead of
-the same chroma_db that gateway.py and vulns.py use — a different,
-possibly stale vector store.
+Bản này dùng Ollama để nhúng văn bản (thay cho HuggingFace + torch), vì
+torch bị Windows chặn (Application Control policy). Ollama đã chạy sẵn cho
+phần phân tích cảnh báo nên không cần cài thêm thư viện nặng nào.
 
-This module is the single source of truth: import get_vectorstore() (and
-`embeddings` / CHROMA_PATH if needed) from here in every other file
-instead of constructing HuggingFaceEmbeddings/Chroma directly.
+Giao diện giữ nguyên: get_vectorstore(), embeddings, CHROMA_PATH,
+COLLECTION_NAME. Các tệp khác (gateway.py, vulns.py, retriever.py) không
+cần đổi cách gọi.
+
+LƯU Ý QUAN TRỌNG: mô hình nhúng khác thì vector cũ KHÔNG dùng được.
+Phải xóa (hoặc đổi tên) thư mục chroma_db cũ rồi nạp lại toàn bộ tài liệu.
 """
 
 import os
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db")
+CHROMA_PATH = os.path.join(BASE_DIR, "chroma_db_ollama")
 COLLECTION_NAME = "soc_knowledge"
 
-# Loaded once at import time — every module that imports this file
-# reuses the same instance via Python's module cache.
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+# Có thể đổi bằng biến môi trường trong tệp .env nếu cần.
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+EMBED_MODEL = os.getenv("EMBED_MODEL", "bge-m3")
+
+# Nạp một lần khi import — mọi tệp import module này dùng chung một đối tượng.
+embeddings = OllamaEmbeddings(
+    model=EMBED_MODEL,
+    base_url=OLLAMA_BASE_URL,
 )
 
 _vectorstore = None
 
 
 def get_vectorstore() -> Chroma:
-    """Returns a single shared Chroma vectorstore instance."""
+    """Trả về một đối tượng kho vector Chroma dùng chung."""
     global _vectorstore
     if _vectorstore is None:
         _vectorstore = Chroma(

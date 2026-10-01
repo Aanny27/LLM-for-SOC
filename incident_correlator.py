@@ -51,6 +51,25 @@ def _extract_key(alert: dict) -> str:
     return "host:" + str((alert.get("agent") or {}).get("name", "unknown"))
 
 
+def _alert_priority(alert: dict) -> tuple:
+    """
+    Điểm ưu tiên để chọn 'cảnh báo đại diện' (top_alert) của sự cố.
+    So sánh theo tuple, phần tử đầu quan trọng nhất:
+      1) rule.level  — càng cao càng ưu tiên
+      2) có phải cảnh báo tấn công thật không (rule.groups chứa "attack"/"exploit"/...)
+         — hòa level thì cảnh báo tấn công thật luôn thắng cảnh báo "có thể vô hại"
+         như file integrity/syscheck.
+      3) có mã MITRE hay không — cảnh báo có gắn kỹ thuật MITRE cụ thể thường
+         đáng chú ý hơn cảnh báo chung chung.
+    """
+    rule = alert.get("rule") or {}
+    level = rule.get("level", 0)
+    groups = set(rule.get("groups") or [])
+    is_real_attack = 1 if groups & {"attack", "exploit", "web", "sqli", "xss"} else 0
+    has_mitre = 1 if (rule.get("mitre") or {}).get("id") else 0
+    return (level, is_real_attack, has_mitre)
+
+
 class Incident:
     def __init__(self, key: str, first_alert: dict):
         self.key = key
@@ -69,13 +88,18 @@ class Incident:
 
     def to_context(self) -> dict:
         rules = [a.get("rule") or {} for a in self.alerts]
-        top_alert = max(self.alerts, key=lambda a: (a.get("rule") or {}).get("level", 0))
+        top_alert = max(self.alerts, key=_alert_priority)
         return {
             "key": self.key,
             "source_ip": None if self.key.startswith("host:") else self.key,
             "alert_count": len(self.alerts),
             "rule_ids": sorted({str(r.get("id")) for r in rules if r.get("id")}),
             "rule_descriptions": sorted({r.get("description") for r in rules if r.get("description")}),
+            "mitre_techniques": sorted({
+                f"{tid} - {tname}"
+                for r in rules
+                for tid, tname in zip((r.get("mitre") or {}).get("id", []), (r.get("mitre") or {}).get("technique", []))
+            }),
             "target_hosts": sorted({(a.get("agent") or {}).get("name") for a in self.alerts if (a.get("agent") or {}).get("name")}),
             "max_level": max((r.get("level", 0) for r in rules), default=0),
             "first_seen": self.first_seen.isoformat(timespec="seconds"),
