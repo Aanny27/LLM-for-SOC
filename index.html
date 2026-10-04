@@ -1187,7 +1187,7 @@
                 });
                 const data = await res.json();
                 if (data.error) { out.innerHTML = `<span class="text-red-400">${escapeHTML(data.explanation)}</span>`; }
-                else { out.innerText = JSON.stringify(data.query, null, 2) + "\n\n/* " + data.explanation + " */"; }
+                else { out.innerText = JSON.stringify({ query: data.query }, null, 2) + "\n\n/* " + data.explanation + " */"; }
             } catch (e) {
                 out.innerText = e.name === 'AbortError' ? "Hết thời gian chờ phản hồi từ server." : "Lỗi kết nối API";
             } finally {

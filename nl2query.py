@@ -28,6 +28,14 @@ Schema chính của index `wazuh-alerts-*` trên Wazuh Indexer (OpenSearch):
 - data.win.system.eventID
 - full_log: log gốc dạng text
 - decoder.name
+
+LƯU Ý QUAN TRỌNG khi chọn field cho loại tấn công:
+- rule.description là mô tả tự do, KHÔNG đoán chữ người dùng gõ có xuất hiện y nguyên trong đó hay không
+  (vd: Wazuh có thể ghi "Multiple Windows Logon Failures" chứ không ghi chữ "brute force")
+- ƯU TIÊN dùng rule.groups (term, vì đây là mảng nhãn chuẩn hóa) khi câu hỏi nói về LOẠI tấn công chung chung,
+  ví dụ: authentication_failed, authentication_success, web, sql_injection, attack, invalid_login
+- Nếu người dùng cho số rule_id cụ thể thì dùng rule.id (term)
+- Chỉ dùng match trên rule.description khi câu hỏi có từ khóa rất đặc thù không thuộc nhóm chuẩn nào ở trên
 """
 
 PROMPT = """Bạn là chuyên gia OpenSearch Query DSL cho hệ thống Wazuh SIEM.
@@ -43,7 +51,7 @@ QUY TẮC:
 
 Ví dụ:
 Câu hỏi: "Tìm cảnh báo brute force RDP trong 24 giờ qua"
-{{"query": {{"bool": {{"must": [{{"match": {{"rule.description": "brute force"}}}}, {{"match": {{"rule.description": "RDP"}}}}, {{"range": {{"@timestamp": {{"gte": "now-24h"}}}}}}]}}}}, "explanation": "Tìm alert liên quan brute force RDP trong 24h gần nhất"}}
+{{"query": {{"bool": {{"must": [{{"term": {{"rule.groups": "authentication_failed"}}}}, {{"range": {{"@timestamp": {{"gte": "now-24h"}}}}}}]}}}}, "explanation": "Tìm alert thuộc nhóm authentication_failed trong 24h gần nhất"}}
 
 Câu hỏi của SOC analyst: {question}
 

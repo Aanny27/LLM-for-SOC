@@ -148,7 +148,7 @@ def save_result(alert: WazuhAlert, parsed: dict, ui_sources: list = None, incide
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             datetime.now().isoformat(timespec="seconds"), alert.rule.id, alert.rule.description,
-            alert.rule.level, alert.agent.get("name", "unknown"), alert.full_log,
+            alert.rule.level, alert.agent.get("name", "unknown"), extract_log_summary(alert),
             parsed.get("severity") or guess_severity(alert.rule.level), parsed.get("analysis_text", ""),
             parsed.get("confidence"), parsed.get("risk_score"), parsed.get("mitre_technique"),
             json.dumps(parsed.get("recommended_actions", []), ensure_ascii=False),
@@ -475,6 +475,10 @@ def mitre_from_wazuh(alert) -> str | None:
 
 # --- XỬ LÝ NHẬN ALERT + RAG PLAYBOOK (PHẦN QUAN TRỌNG NHẤT) ---
 SYSTEM_PROMPT_ANALYSIS = """Bạn là chuyên gia SOC Blue-team. Hãy phân tích cảnh báo này dựa vào PLAYBOOK được cung cấp.
+BẮT BUỘC: toàn bộ nội dung văn bản trả về (analysis_text, từng mục trong recommended_actions,
+ai_verdict_reason) PHẢI viết bằng tiếng Việt. TUYỆT ĐỐI không dùng tiếng Trung, tiếng Anh hay bất
+kỳ ngôn ngữ nào khác trong các trường văn bản, kể cả khi PLAYBOOK tham khảo có đoạn tiếng Anh —
+luôn diễn giải lại bằng tiếng Việt.
 Trả lời DUY NHẤT bằng định dạng JSON sau, không xuất hiện text dư thừa:
 { "severity": "CRITICAL/HIGH/MEDIUM/LOW", "confidence": 90, "risk_score": 85, "mitre_technique": "Txxxx - Tên kỹ thuật", "analysis_text": "Giải thích chi tiết vì sao đây là mối đe dọa dựa trên playbook...", "recommended_actions": ["Hành động 1", "Hành động 2"], "ai_verdict": "true_positive hoặc false_positive", "ai_verdict_reason": "Một câu nêu căn cứ trong log" }
 
@@ -483,6 +487,33 @@ Quy tắc cho trường "ai_verdict" (chỉ được dùng đúng một trong ha
 - "false_positive": cảnh báo phát sinh từ hoạt động bình thường hoặc do cấu hình, không có dấu hiệu tấn công trong log.
 Chỉ dựa vào log và playbook, không suy đoán thêm.
 Không tự sinh mã Txxxx. Để trống nếu không chắc."""
+
+DEFAULT_FULL_LOG = "Log Windows EventChannel không có full_log"
+
+def extract_log_summary(alert: "WazuhAlert") -> str:
+    """Alert EventChannel (Windows Security) không có field full_log —
+    tự dựng chuỗi tóm tắt từ data.win.eventdata để AI có dữ liệu thật
+    thay vì chỉ thấy câu mặc định."""
+    if alert.full_log and alert.full_log != DEFAULT_FULL_LOG:
+        return alert.full_log
+
+    eventdata = ((alert.data or {}).get("win") or {}).get("eventdata") or {}
+    system = ((alert.data or {}).get("win") or {}).get("system") or {}
+    if not eventdata:
+        return alert.full_log
+
+    fields = {
+        "Tài khoản bị nhắm tới": eventdata.get("targetUserName"),
+        "IP nguồn": eventdata.get("ipAddress"),
+        "Máy nguồn (Workstation)": eventdata.get("workstationName"),
+        "Status": eventdata.get("status"),
+        "Sub Status": eventdata.get("subStatus"),
+        "Logon Type": eventdata.get("logonType"),
+        "Event ID": system.get("eventID"),
+    }
+    parts = [f"{k}: {v}" for k, v in fields.items() if v]
+    return "; ".join(parts) if parts else alert.full_log
+
 
 def _fallback_analysis(alert: WazuhAlert) -> dict:
     # Dù AI lỗi, vẫn lấy mã MITRE chính thức từ Wazuh nếu có, thay vì luôn để "Chưa xác định".
@@ -530,12 +561,13 @@ async def analyze_and_save(alert: WazuhAlert, incident: dict = None):
     # 1. TRUY XUẤT PLAYBOOK TỪ CHROMA DB
     rag_context = "Chưa có kịch bản playbook nào phù hợp trong Database."
     ui_sources = []
+    log_summary = extract_log_summary(alert)
 
     if retriever:
         if multi:
-            retrieval_query = "; ".join(incident["rule_descriptions"]) + f". {alert.full_log}"
+            retrieval_query = "; ".join(incident["rule_descriptions"]) + f". {log_summary}"
         else:
-            retrieval_query = f"{alert.rule.description}. {alert.full_log}"
+            retrieval_query = f"{alert.rule.description}. {log_summary}"
         try:
             # Code mới của Grok: Lọc đúng file playbook
             filt = playbook_filter(alert.rule.id, alert.rule.description)
@@ -603,7 +635,7 @@ Các cảnh báo trong sự cố này:
 Rule ID: {alert.rule.id}
 Rule Mô tả: {alert.rule.description} (level {alert.rule.level})
 Agent: {alert.agent.get('name', 'unknown')}
-Log gốc: {alert.full_log}
+Log gốc: {log_summary}
 
 Nhiệm vụ: {task}"""
 
