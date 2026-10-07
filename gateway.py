@@ -46,10 +46,11 @@ try:
     print(f"[*] Đã kết nối Database Playbook thành công ({vectorstore._collection.count()} đoạn văn bản).")
 except Exception as e:
     print(f"[!] Lỗi kết nối Database Playbook: {e}. AI sẽ phân tích chay (không có Playbook).")
+    vectorstore = None
     retriever = None
 
 if not USE_RAG:
-    retriever = None   # bỏ qua bước truy xuất Playbook hoàn toàn
+    retriever = None   # bỏ qua bước truy xuất Playbook hoàn toàn khi server chạy mặc định không RAG
 
 # --- KHỞI TẠO SQLITE VÀ BẢNG ANALYSIS ---
 def init_db():
@@ -84,11 +85,43 @@ def init_db():
         # phán quyết của AI và không còn gì để so sánh khi đánh giá độ chính xác.
         "ai_verdict": "TEXT", "ai_verdict_reason": "TEXT",
         # Ghi lại kết quả này sinh ra khi bật hay tắt RAG ("rag" / "no_rag")
-        "rag_mode": "TEXT"
+        "rag_mode": "TEXT",
+        # Toàn bộ dict `incident` (JSON) khi alert_count > 1 — replay_eval.py
+        # cần cái này để dựng lại sample_alerts/rule_descriptions khi chạy lại
+        # phân tích trên CÙNG sự cố gộp nhiều cảnh báo. Không có cột này thì
+        # rebuild_input() trong replay_eval.py luôn rơi vào nhánh "degraded"
+        # (chỉ còn alert đại diện, mất hết các cảnh báo mẫu của cả cụm).
+        "incident_json": "TEXT",
     }
     for col, col_type in new_cols.items():
         if col not in cols:
             conn.execute(f"ALTER TABLE analysis ADD COLUMN {col} {col_type}")
+
+    # Bảng chứa kết quả replay_eval.py — KHÔNG đụng tới bảng analysis khi chạy
+    # lại phân tích trên các sự cố đã gán nhãn, để bảng điều khiển không bị
+    # trùng thẻ. gateway.py trước đây chưa từng tạo bảng này dù replay_eval.py
+    # đã giả định nó tồn tại — đây là chỗ tạo thật.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS replay_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_id INTEGER NOT NULL,
+            rag_mode TEXT NOT NULL,
+            run_no INTEGER NOT NULL,
+            ai_verdict TEXT,
+            ai_verdict_reason TEXT,
+            severity TEXT,
+            mitre_technique TEXT,
+            confidence INTEGER,
+            risk_score INTEGER,
+            analysis TEXT,
+            recommended_actions TEXT,
+            sources_used TEXT,
+            input_degraded INTEGER,
+            temperature REAL,
+            created_at TEXT,
+            UNIQUE(source_id, rag_mode, run_no)
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -137,15 +170,26 @@ def quick_risk_score(alert: "WazuhAlert") -> int:
 def save_result(alert: WazuhAlert, parsed: dict, ui_sources: list = None, incident: dict = None):
     if ui_sources is None:
         ui_sources = []
-        
+
+    # Lưu nguyên incident (sample_alerts, rule_descriptions, rule_ids, key,
+    # duration_seconds, target_hosts, mitre_techniques...) để replay_eval.py
+    # dựng lại đúng ngữ cảnh gộp khi chạy lại phân tích sau này. Bọc try/except
+    # vì incident tới từ correlator, không kiểm soát 100% khả năng serialize.
+    incident_json = None
+    if incident and incident.get("alert_count", 1) > 1:
+        try:
+            incident_json = json.dumps(incident, ensure_ascii=False, default=str)
+        except Exception as e:
+            print(f"[!] Không serialize được incident để lưu incident_json: {e}")
+
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         """INSERT INTO analysis
            (timestamp, rule_id, rule_description, rule_level, agent_name, full_log,
             severity, analysis, confidence, risk_score, mitre_technique, recommended_actions, sources_used,
             source_ip, alert_count, incident_start, incident_end,
-            ai_verdict, ai_verdict_reason, rag_mode)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            ai_verdict, ai_verdict_reason, rag_mode, incident_json)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             datetime.now().isoformat(timespec="seconds"), alert.rule.id, alert.rule.description,
             alert.rule.level, alert.agent.get("name", "unknown"), extract_log_summary(alert),
@@ -157,7 +201,7 @@ def save_result(alert: WazuhAlert, parsed: dict, ui_sources: list = None, incide
             (incident or {}).get("first_seen"), (incident or {}).get("last_seen"),
             # None (NULL) với alert không qua AI (CIS/SCA, level < 5) để khi
             # tính chỉ số các dòng này tự bị loại, không lẫn với "unknown".
-            parsed.get("ai_verdict"), parsed.get("ai_verdict_reason"), RAG_MODE,
+            parsed.get("ai_verdict"), parsed.get("ai_verdict_reason"), RAG_MODE, incident_json,
         ),
     )
     conn.commit()
@@ -288,20 +332,13 @@ async def set_verdict(data: VerdictUpdate):
     conn.close()
     return {"status": "ok"}
 
-@app.get("/api/v1/soc/eval-metrics")
-def eval_metrics():
-    """So sánh phán quyết của AI (ai_verdict) với nhãn của người (verdict),
-    tách theo chế độ rag / no_rag. Chỉ tính các sự cố đã được người gán nhãn."""
-    conn = sqlite3.connect(DB_PATH)
-    rows = conn.execute(
-        "SELECT COALESCE(rag_mode, 'rag'), ai_verdict, verdict FROM analysis "
-        "WHERE verdict IN ('true_positive','false_positive') AND ai_verdict IS NOT NULL"
-    ).fetchall()
-    conn.close()
+def _ratio(x, y):
+    return round(x / y, 4) if y else None
 
-    def ratio(x, y):
-        return round(x / y, 4) if y else None
 
+def _compute_metrics_by_mode(rows):
+    """rows: list[(mode, ai_verdict, human_verdict)]. Dùng chung cho cả 2 nguồn
+    (analysis trực tiếp / replay_runs chạy lại), tránh lặp code 2 lần."""
     out = {}
     for mode in sorted({r[0] for r in rows}):
         sub = [(a, h) for m, a, h in rows if m == mode]
@@ -310,16 +347,44 @@ def eval_metrics():
         fn = sum(1 for a, h in sub if a == "false_positive" and h == "true_positive")
         tn = sum(1 for a, h in sub if a == "false_positive" and h == "false_positive")
         unknown = sum(1 for a, _ in sub if a not in VALID_AI_VERDICTS)
-        precision, recall = ratio(tp, tp + fp), ratio(tp, tp + fn)
-        f1 = ratio(2 * precision * recall, precision + recall) if precision and recall else None
+        precision, recall = _ratio(tp, tp + fp), _ratio(tp, tp + fn)
+        f1 = _ratio(2 * precision * recall, precision + recall) if precision and recall else None
         out[mode] = {
             "so_su_co_da_gan_nhan": len(sub),
             "dương_tính_thật": tp, "dương_tính_giả": fp, "âm_tính_giả": fn, "âm_tính_thật": tn,
             "ai_chưa_kết_luận": unknown,
-            "độ_chính_xác_chung": ratio(tp + tn, tp + fp + fn + tn),
+            "độ_chính_xác_chung": _ratio(tp + tn, tp + fp + fn + tn),
             "độ_chuẩn": precision, "độ_phủ": recall, "f1": f1,
         }
     return out
+
+
+@app.get("/api/v1/soc/eval-metrics")
+def eval_metrics():
+    """So sánh phán quyết của AI (ai_verdict) với nhãn của người (verdict),
+    tách theo chế độ rag / no_rag, từ 2 nguồn riêng biệt:
+    - "truc_tiep": kết quả gốc trong bảng analysis (pipeline alert thật, mỗi
+      alert chỉ chạy đúng 1 lần ở chế độ RAG mà server đang bật lúc đó).
+    - "chay_lai": kết quả từ replay_eval.py (bảng replay_runs) — CÙNG một tập
+      sự cố được chạy lại ở CẢ 2 chế độ để so sánh công bằng. Đây là nguồn
+      đúng để so sánh rag vs no_rag; "truc_tiep" thường chỉ có 1 chế độ vì
+      server chỉ chạy 1 chế độ tại một thời điểm."""
+    conn = sqlite3.connect(DB_PATH)
+    direct_rows = conn.execute(
+        "SELECT COALESCE(rag_mode, 'rag'), ai_verdict, verdict FROM analysis "
+        "WHERE verdict IN ('true_positive','false_positive') AND ai_verdict IS NOT NULL"
+    ).fetchall()
+    replay_rows = conn.execute(
+        """SELECT r.rag_mode, r.ai_verdict, a.verdict
+           FROM replay_runs r JOIN analysis a ON a.id = r.source_id
+           WHERE a.verdict IN ('true_positive','false_positive') AND r.ai_verdict IS NOT NULL"""
+    ).fetchall()
+    conn.close()
+
+    return {
+        "truc_tiep": _compute_metrics_by_mode(direct_rows),
+        "chay_lai": _compute_metrics_by_mode(replay_rows),
+    }
 
 class ChatMessage(BaseModel):
     role: str
@@ -363,11 +428,29 @@ async def chat(req: ChatRequest):
         return {"answer": f"⚠️ Lỗi kết nối Ollama: {str(e)}"}
 
 class NL2QueryRequest(BaseModel):
-    question: str
+    question: str = ""
+    alert_id: int | None = None
 
 @app.post("/api/v1/soc/nl2query")
 def nl2query_endpoint(req: NL2QueryRequest):
-    return generate_query(req.question)
+    alert_context = ""
+    if req.alert_id is not None:
+        conn = sqlite3.connect(DB_PATH)
+        row = conn.execute(
+            "SELECT timestamp, rule_id, rule_description, rule_level, agent_name, source_ip, mitre_technique, full_log FROM analysis WHERE id = ?",
+            (req.alert_id,)
+        ).fetchone()
+        conn.close()
+        if row:
+            ts, rid, desc, lvl, agent, sip, mitre, full_log = row
+            alert_context = (
+                f"Thời gian: {ts}\nrule.id: {rid}\nrule.level: {lvl}\nMô tả: {desc}\n"
+                f"agent.name: {agent}\nIP nguồn: {sip or 'không rõ'}\nMITRE: {mitre}\n"
+                f"Log: {str(full_log or '')[:800]}"
+            )
+    if not req.question.strip() and not alert_context:
+        return {"query": {}, "explanation": "[Lỗi sinh query] Hãy nhập câu hỏi hoặc chọn một alert.", "error": True}
+    return generate_query(req.question, alert_context)
 # --- TÍNH NĂNG: TẠO KẾ HOẠCH KHẮC PHỤC CVE (REMEDIATION PLAN) ---
 class CVERemediationRequest(BaseModel):
     cve_id: str
@@ -552,34 +635,39 @@ def normalize_ai_verdict(parsed: dict):
 # chặn sớm, không tốn tài nguyên Ollama và không lưu trùng vào dashboard.
 CVE_ALERT_RE = re.compile(r"^CVE-\d{4}-\d{4,}\s+affects\b", re.I)
 
-# --- PHÂN TÍCH 1 INCIDENT (RAG + LLM + LƯU DB) ---
-async def analyze_and_save(alert: WazuhAlert, incident: dict = None):
-    """alert = alert đại diện (level cao nhất). incident = tóm tắt cả cụm alert
-    đã gom (None nếu không gom). Gọi Ollama đúng 1 lần cho cả cụm."""
+# --- PHÂN TÍCH THUẦN SUY LUẬN (KHÔNG GHI DB) ---
+# Tách riêng khỏi analyze_and_save để replay_eval.py gọi lại được nhiều lần
+# với use_rag/temperature khác nhau trên CÙNG một input, mà không tạo dòng
+# mới trong bảng analysis (bảng điều khiển không bị trùng thẻ).
+async def run_analysis(alert: WazuhAlert, incident: dict = None,
+                        use_rag: bool = True, temperature: float = 0.1):
+    """Trả về (parsed, ui_sources). KHÔNG gọi save_result.
+    use_rag/temperature áp dụng CHO LẦN GỌI NÀY, không đụng tới biến toàn
+    cục USE_RAG/retriever (vốn chỉ quyết định hành vi mặc định khi server
+    nhận alert thật qua /wazuh-alert)."""
     multi = bool(incident) and incident.get("alert_count", 1) > 1
 
-    # 1. TRUY XUẤT PLAYBOOK TỪ CHROMA DB
+    # 1. TRUY XUẤT PLAYBOOK TỪ CHROMA DB (chỉ khi use_rag=True và có vectorstore)
     rag_context = "Chưa có kịch bản playbook nào phù hợp trong Database."
     ui_sources = []
     log_summary = extract_log_summary(alert)
 
-    if retriever:
+    if use_rag and vectorstore is not None:
         if multi:
             retrieval_query = "; ".join(incident["rule_descriptions"]) + f". {log_summary}"
         else:
             retrieval_query = f"{alert.rule.description}. {log_summary}"
         try:
-            # Code mới của Grok: Lọc đúng file playbook
             filt = playbook_filter(alert.rule.id, alert.rule.description)
             search_kwargs = {"k": 3}
             if filt:
                 search_kwargs["filter"] = filt
-                
+
             docs = vectorstore.as_retriever(
-                search_type="mmr", 
+                search_type="mmr",
                 search_kwargs=search_kwargs
             ).invoke(retrieval_query)
-            
+
             if docs:
                 rag_context = "\n\n".join([d.page_content for d in docs])
                 seen = set()
@@ -600,7 +688,7 @@ async def analyze_and_save(alert: WazuhAlert, incident: dict = None):
     # 2. GHÉP PLAYBOOK (+ TỔNG HỢP INCIDENT NẾU CÓ) VÀO PROMPT
     incident_block = ""
     task = "Dựa CHỈ VÀO PLAYBOOK ở trên, hãy đưa ra đánh giá `severity`, `mitre_technique`, `analysis_text` và `recommended_actions`. Nếu Playbook không khớp, hãy tự đánh giá độc lập."
-    if not USE_RAG:
+    if not use_rag:
         task = "Hãy đưa ra đánh giá `severity`, `mitre_technique`, `analysis_text` và `recommended_actions` dựa trên dữ liệu cảnh báo."
     if multi:
         samples = "\n".join(
@@ -624,11 +712,11 @@ Các cảnh báo trong sự cố này:
 {samples}
 """
         task = "Đánh giá TOÀN BỘ chuỗi sự kiện trên như MỘT incident duy nhất (severity, mitre_technique, analysis_text, recommended_actions), dựa vào PLAYBOOK. Nếu Playbook không khớp, hãy tự đánh giá độc lập."
-        if not USE_RAG:
+        if not use_rag:
             task = "Đánh giá TOÀN BỘ chuỗi sự kiện trên như MỘT incident duy nhất (severity, mitre_technique, analysis_text, recommended_actions)."
 
-    playbook_block = f"[PLAYBOOK HƯỚNG DẪN XỬ LÝ SOC]:\n{rag_context}\n" if USE_RAG else ""
-    system_prompt = SYSTEM_PROMPT_ANALYSIS if USE_RAG else SYSTEM_PROMPT_NO_RAG
+    playbook_block = f"[PLAYBOOK HƯỚNG DẪN XỬ LÝ SOC]:\n{rag_context}\n" if use_rag else ""
+    system_prompt = SYSTEM_PROMPT_ANALYSIS if use_rag else SYSTEM_PROMPT_NO_RAG
 
     user_prompt = f"""{playbook_block}{incident_block}
 [DỮ LIỆU CẢNH BÁO TỪ WAZUH]:
@@ -647,37 +735,37 @@ Nhiệm vụ: {task}"""
                 "prompt": f"{system_prompt}\n\n{user_prompt}",
                 "stream": False,
                 "format": "json",
-                "options": {"temperature": 0.1, "num_predict": 900}
+                "options": {"temperature": temperature, "num_predict": 900}
             })
             r.raise_for_status()
             raw_response = r.json().get("response", "{}")
             parsed = json.loads(raw_response)
             assert "analysis_text" in parsed and "severity" in parsed, \
                 f"JSON thiếu field bắt buộc. Raw: {raw_response[:300]!r}"
-            
-            # Code mới của Grok: Ép mã MITRE chuẩn từ Wazuh (tránh AI tự bịa)
+
             if multi and incident.get("mitre_techniques"):
-                # Sự cố gộp nhiều cảnh báo -> lấy HỢP mã MITRE của TẤT CẢ cảnh báo,
-                # không chỉ của alert đại diện (top_alert), để không mất mã như T1190
-                # khi top_alert là cảnh báo file-integrity còn cảnh báo khác mới là
-                # tấn công thật.
                 parsed["mitre_technique"] = ", ".join(incident["mitre_techniques"])
             else:
                 official = mitre_from_wazuh(alert)
                 if official:
                     parsed["mitre_technique"] = official
                 elif not is_valid_mitre_technique(parsed.get("mitre_technique")):
-                    # Wazuh không gắn mã, và mã AI tự đưa ra không đúng định dạng Txxxx -> không tin, để trống.
                     parsed["mitre_technique"] = "Chưa xác định"
-                
+
     except Exception as e:
         print(f"[!] Lỗi phân tích LLM: {type(e).__name__}: {e}")
         parsed = _fallback_analysis(alert)
 
-    # Chuẩn hóa phán quyết của AI trước khi lưu (thiếu/sai định dạng -> "unknown")
     parsed["ai_verdict"], parsed["ai_verdict_reason"] = normalize_ai_verdict(parsed)
+    return parsed, ui_sources
 
-    # 4. LƯU DỮ LIỆU VÀ NGUỒN PLAYBOOK VÀO SQLITE
+
+# --- PHÂN TÍCH 1 INCIDENT + GHI DB (DÙNG CHO PIPELINE ALERT THẬT) ---
+async def analyze_and_save(alert: WazuhAlert, incident: dict = None):
+    """Dùng biến toàn cục USE_RAG/temperature mặc định (0.1) — đúng hành vi
+    production. replay_eval.py KHÔNG gọi hàm này, gọi thẳng run_analysis
+    để không ghi trùng vào bảng analysis."""
+    parsed, ui_sources = await run_analysis(alert, incident, use_rag=USE_RAG, temperature=0.1)
     save_result(alert, parsed, ui_sources, incident)
     n = incident["alert_count"] if incident else 1
     print(f"[+] Phân tích xong incident ({n} alert, level cao nhất {alert.rule.level}) - {len(ui_sources)} mục Playbook.")

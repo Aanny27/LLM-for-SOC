@@ -47,13 +47,14 @@ Nhiệm vụ: chuyển câu hỏi tiếng Việt của SOC analyst thành OpenSe
 QUY TẮC:
 - CHỈ trả JSON, không thêm chữ ngoài JSON, không dùng markdown code fence.
 - Format bắt buộc: {{"query": {{...}}, "explanation": "giải thích ngắn gọn"}}
+- Nếu có khối [ALERT ĐANG CHỌN], hãy dùng đúng rule.id, agent.name, IP nguồn, đường dẫn, tên người dùng trong đó để tạo điều kiện lọc cụ thể. Không bịa giá trị ngoài khối đó.
 - Dùng "range" cho thời gian (vd "now-24h"), "match"/"match_phrase" cho text, "term" cho keyword field chính xác, "bool"/"must" để kết hợp điều kiện.
 
 Ví dụ:
 Câu hỏi: "Tìm cảnh báo brute force RDP trong 24 giờ qua"
 {{"query": {{"bool": {{"must": [{{"term": {{"rule.groups": "authentication_failed"}}}}, {{"range": {{"@timestamp": {{"gte": "now-24h"}}}}}}]}}}}, "explanation": "Tìm alert thuộc nhóm authentication_failed trong 24h gần nhất"}}
 
-Câu hỏi của SOC analyst: {question}
+{alert_block}Câu hỏi của SOC analyst: {question}
 
 JSON:"""
 
@@ -67,8 +68,11 @@ def _extract_json(text: str) -> dict:
     return json.loads(text[start:end + 1])
 
 
-def generate_query(question: str) -> dict:
-    prompt = PROMPT.format(schema=WAZUH_SCHEMA_HINT, question=question)
+def generate_query(question: str, alert_context: str = "") -> dict:
+    alert_block = f"[ALERT ĐANG CHỌN]:\n{alert_context}\n\n" if alert_context else ""
+    if not question.strip() and alert_context:
+        question = "Viết câu truy vấn để điều tra tiếp alert đang chọn (tìm các alert liên quan cùng nguồn, cùng máy, quanh thời điểm này)"
+    prompt = PROMPT.format(schema=WAZUH_SCHEMA_HINT, alert_block=alert_block, question=question)
     try:
         raw = llm.invoke(prompt).content
         parsed = _extract_json(raw)

@@ -114,7 +114,12 @@ async def main():
     for m in modes:
         if m not in ("rag", "no_rag"):
             raise SystemExit(f"Chế độ không hợp lệ: {m!r} (chỉ nhận rag hoặc no_rag)")
-    if "rag" in modes and gateway.retriever is None:
+    # Dùng gateway.vectorstore (không phải gateway.retriever) để kiểm tra: retriever
+    # bị ép về None khi server khởi động với USE_RAG=false (xem gateway.py), dù
+    # ChromaDB vẫn kết nối tốt. run_analysis() dùng vectorstore trực tiếp nên đây
+    # mới là điều kiện đúng — nếu check theo retriever, replay --modes rag sẽ bị
+    # chặn nhầm "không kết nối được Playbook" mỗi khi server đang chạy no_rag.
+    if "rag" in modes and gateway.vectorstore is None:
         raise SystemExit("Không kết nối được cơ sở dữ liệu Playbook nên không chạy được chế độ rag. "
                          "Kiểm tra lại ChromaDB hoặc chạy riêng --modes no_rag.")
 

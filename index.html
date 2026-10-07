@@ -438,6 +438,10 @@
                     <p class="text-xs text-slate-400 mb-4">Nhập ngôn ngữ tự nhiên để AI tự động chuyển thành Query DSL.
                     </p>
 
+                    <select id="nl2q-alert-select"
+                        class="w-full bg-black/60 border border-white/20 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-blue-500 font-mono mb-3 cursor-pointer">
+                        <option value="">— Không gắn Alert —</option>
+                    </select>
                     <textarea id="query-input"
                         class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-blue-500 mb-4 h-24"
                         placeholder="VD: Tìm các cảnh báo SQL injection trong 1 giờ qua..."></textarea>
@@ -959,6 +963,14 @@
             });
             alertSelect.innerHTML = selectHtml;
             alertSelect.value = currentSelectedId;
+
+            // Danh sách chọn alert cho tab NL2Query (cùng dữ liệu với tab Chat)
+            const nlSelect = document.getElementById('nl2q-alert-select');
+            if (nlSelect) {
+                const nlSelected = nlSelect.value;
+                nlSelect.innerHTML = selectHtml;
+                nlSelect.value = nlSelected;
+            }
         }
 
         // --- PHÂN TRANG: 20 alert/trang ---
@@ -1169,7 +1181,9 @@
         // ==========================================
         async function generateNL2Query() {
             const q = document.getElementById('query-input').value;
-            if (!q) return;
+            const nlAlertVal = document.getElementById('nl2q-alert-select').value;
+            const nlAlertId = nlAlertVal ? parseInt(nlAlertVal) : null;
+            if (!q.trim() && nlAlertId === null) return;
             const btn = document.getElementById('btn-nl2q');
             const out = document.getElementById('query-output');
             btn.innerText = "Đang xử lý..."; btn.disabled = true;
@@ -1182,7 +1196,7 @@
             try {
                 const res = await fetch('/api/v1/soc/nl2query', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: q }),
+                    body: JSON.stringify({ question: q, alert_id: nlAlertId }),
                     signal: controller.signal
                 });
                 const data = await res.json();
