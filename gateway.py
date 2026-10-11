@@ -386,6 +386,26 @@ def eval_metrics():
         "chay_lai": _compute_metrics_by_mode(replay_rows),
     }
 
+# --- XUẤT BÁO CÁO WORD (.docx) THEO KHOẢNG THỜI GIAN ---
+import io
+from fastapi import HTTPException
+from fastapi.responses import StreamingResponse
+from report_docx import build_report
+
+@app.get("/api/v1/soc/report")
+def export_report(from_ts: Optional[str] = None,
+                  to_ts: Optional[str] = None,
+                  hide_sca: bool = True):
+    data = build_report(DB_PATH, from_ts, to_ts, hide_sca)
+    if data is None:
+        raise HTTPException(404, "Không có cảnh báo trong khoảng đã chọn.")
+    fname = f"SOC_Report_{datetime.now():%d_%m_%Y_%H%M%S}.docx"
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )
+
 class ChatMessage(BaseModel):
     role: str
     content: str

@@ -396,6 +396,11 @@
                             class="px-3 py-1 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[11px] font-bold text-slate-300 transition">
                             <i class="fa-regular fa-eye-slash mr-1"></i> Gán nhãn mù: Tắt
                         </button>
+                        <button type="button" id="btn-export-report" onclick="exportReport()"
+                            title="Xuất báo cáo Word theo khoảng thời gian đang chọn"
+                            class="px-3 py-1 rounded-lg border border-blue-500/50 bg-blue-500/10 hover:bg-blue-500/20 text-[11px] font-bold text-blue-400 transition">
+                            <i class="fa-solid fa-file-word mr-1"></i> Xuất báo cáo
+                        </button>
                     </div>
                     <div
                         class="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 px-3 py-1.5 font-mono text-xs text-slate-400 shadow-inner">
@@ -729,8 +734,13 @@
                 }
             });
 
-            document.getElementById('abs-start').textContent = (draftFrom || r.from) ? fmtDT(draftFrom || r.from) : '—';
-            document.getElementById('abs-end').textContent = (draftTo || r.to) ? fmtDT(draftTo || r.to) : 'now';
+            document.getElementById('abs-start').textContent = draftFrom ? fmtDT(draftFrom) : (r.from ? fmtDT(r.from) : '—');
+            // pickStep === 1: vừa chọn ngày bắt đầu, draftTo cố ý null. Không fallback
+            // về khoảng cũ — nếu fallback thì bấm ngày khác mà Start/End không đổi,
+            // trông như chọn ngày không có tác dụng.
+            document.getElementById('abs-end').textContent = draftTo
+                ? fmtDT(draftTo)
+                : (pickStep === 1 ? 'chọn ngày kết thúc' : (r.to ? fmtDT(r.to) : 'now'));
         }
 
         function toggleSiemPicker(ev) {
@@ -842,11 +852,15 @@
                 if (critDays.has(k)) dotHtml = '<div class="absolute bottom-1 w-[4px] h-[4px] rounded-full bg-red-500"></div>';
                 else if (alertDays.has(k)) dotHtml = '<div class="absolute bottom-1 w-[4px] h-[4px] rounded-full bg-blue-400"></div>';
 
-                host.insertAdjacentHTML('beforeend', `<button type="button" class="${baseCls} ${textCls} ${bgCls}" ${disabled ? 'disabled' : ''} onclick="pickDay(${y},${m},${d})"><span>${d}</span>${dotHtml}</button>`);
+                host.insertAdjacentHTML('beforeend', `<button type="button" class="${baseCls} ${textCls} ${bgCls}" ${disabled ? 'disabled' : ''} onclick="pickDay(event,${y},${m},${d})"><span>${d}</span>${dotHtml}</button>`);
             }
         }
 
-        function pickDay(y, m, d) {
+        function pickDay(ev, y, m, d) {
+            // Chặn bubble: renderCalendar() bên dưới gỡ nút này khỏi DOM ngay trong
+            // click. Nếu sự kiện vẫn nổi lên document, listener "click ra ngoài"
+            // thấy target không còn nằm trong popover và đóng picker — lựa chọn mất.
+            if (ev && ev.stopPropagation) ev.stopPropagation();
             const day = startOfDay(new Date(y, m, d));
             if (pickStep === 0 || (draftFrom && draftTo)) {
                 draftFrom = day; draftTo = null; pickStep = 1;
@@ -861,7 +875,10 @@
             const pop = document.getElementById('siem-pop');
             const trg = document.getElementById('siem-trigger');
             if (!pop || pop.classList.contains('hidden')) return;
-            if (pop.contains(e.target) || trg.contains(e.target)) return;
+            // Nút ngày vừa bị renderCalendar() gỡ khỏi DOM: target không còn connected,
+            // pop.contains() = false dù click phát ra từ trong lịch. Không được đóng.
+            if (e.target && !e.target.isConnected) return;
+            if (pop.contains(e.target) || (trg && trg.contains(e.target))) return;
             pop.classList.add('hidden');
             pop.classList.remove('flex');
         });
@@ -1076,6 +1093,37 @@
                 if (!lastAlertPayload.alerts) lastAlertPayload.alerts = [];
                 renderFilteredDashboard();
             } catch (err) { console.error("Lỗi lấy dữ liệu", err); }
+        }
+
+        // --- XUẤT BÁO CÁO WORD THEO KHOẢNG THỜI GIAN ĐANG CHỌN ---
+        async function exportReport() {
+            const btn = document.getElementById('btn-export-report');
+            const old = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang xuất...';
+            try {
+                let url = '/api/v1/soc/report?hide_sca=true';
+                if (timeRange.from) url += `&from_ts=${encodeURIComponent(toLocalISO(timeRange.from))}`;
+                if (timeRange.to) url += `&to_ts=${encodeURIComponent(toLocalISO(timeRange.to))}`;
+                const res = await fetch(url);
+                if (res.status === 404) { alert('Không có cảnh báo trong khoảng thời gian đã chọn.'); return; }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                const d = new Date();
+                a.href = URL.createObjectURL(blob);
+                a.download = `SOC_Report_${pad(d.getDate())}_${pad(d.getMonth() + 1)}_${d.getFullYear()}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(a.href);
+            } catch (err) {
+                console.error('Lỗi xuất báo cáo', err);
+                alert('Xuất báo cáo thất bại. Vui lòng thử lại.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = old;
+            }
         }
 
         // --- MODAL "XEM ĐẦY ĐỦ" PHÂN TÍCH AI ---
